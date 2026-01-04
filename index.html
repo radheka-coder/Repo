@@ -7,15 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-1: linear-gradient(180deg, #0f172a, #1e1b4b);
-            --glass: rgba(20, 20, 30, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-top: #0f172a;
+            --bg-bottom: #1e1b4b;
+            --glass: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.15);
             --text: #e2e8f0;
             --accent: #818cf8;
             --neon-blue: #38bdf8;
+            --neon-green: #34d399; /* For Car Mode */
             --neon-pink: #f472b6;
-            --neon-green: #34d399;
-            --neon-gold: #fbbf24;
         }
 
         * { box-sizing: border-box; font-family: 'Quicksand', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -23,7 +23,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: var(--bg-1);
+            background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
             color: var(--text);
             display: flex;
             flex-direction: column;
@@ -32,237 +32,259 @@
 
         header {
             text-align: center;
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(5px);
+            padding: 15px 20px 5px;
+            font-size: 1.4rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: lowercase;
+            color: rgba(255,255,255,0.7);
         }
-        
-        .title { font-size: 1.4rem; font-weight: 300; letter-spacing: 4px; color: rgba(255,255,255,0.8); }
-        .gentle-msg { font-size: 0.75rem; color: var(--accent); margin-top: 5px; font-weight: 500; opacity: 0.9; min-height: 1rem; }
 
         /* Nav */
         nav {
-            display: flex; gap: 10px; padding: 10px 15px;
-            overflow-x: auto; scrollbar-width: none;
-            background: rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            padding: 10px 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         nav::-webkit-scrollbar { display: none; }
 
         nav button {
             background: rgba(255,255,255,0.05);
             border: 1px solid var(--glass-border);
-            padding: 8px 16px; border-radius: 20px;
-            font-size: 0.85rem; color: rgba(255,255,255,0.7);
-            flex-shrink: 0; transition: 0.3s;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+            color: rgba(255,255,255,0.6);
+            flex-shrink: 0;
         }
 
         nav button.active {
-            background: var(--accent); color: white;
-            box-shadow: 0 0 15px rgba(129, 140, 248, 0.4); border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(129, 140, 248, 0.4);
         }
 
-        main { flex: 1; position: relative; overflow-y: auto; padding-bottom: 30px; }
+        main {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            padding-bottom: 30px;
+        }
 
         section {
-            display: none; padding: 15px; max-width: 500px; margin: 0 auto;
-            width: 100%; animation: fadeIn 0.4s ease;
+            display: none;
+            padding: 10px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
         }
+
         section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .desc { text-align: center; font-size: 0.9rem; opacity: 0.7; margin-bottom: 15px; }
+        .desc { text-align: center; font-size: 0.85rem; opacity: 0.5; margin-bottom: 15px; margin-top: 5px; }
 
-        /* --- DRAW (PERSISTENT) --- */
-        #drawCanvas {
-            background: #000; border-radius: 20px; display: block; margin: 0 auto;
-            border: 1px solid var(--glass-border); touch-action: none; cursor: crosshair;
-        }
-        .palette { display: flex; justify-content: center; gap: 10px; margin-top: 10px; align-items: center; }
-        .color-dot {
-            width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
-            cursor: pointer; transition: 0.2s;
-        }
-        .color-dot.active { transform: scale(1.2); border-color: white; }
-        .clear-btn {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
-            color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; cursor: pointer;
+        /* --- MIST (Silent) --- */
+        #mistCanvas {
+            background: #111827;
+            border-radius: 20px;
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
         }
 
-        /* --- BASKETBALL FLING --- */
-        #gameCanvas {
-            background: rgba(255,255,255,0.02); border-radius: 20px; display: block; margin: 0 auto;
-            border: 1px solid var(--glass-border); touch-action: none;
+        /* --- POPS --- */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .bubble {
+            aspect-ratio: 1;
+            background: #1e293b;
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+            cursor: pointer;
+            transition: 0.1s;
         }
-        .score-board { text-align: center; margin-top: 10px; font-size: 1.2rem; color: var(--neon-gold); font-weight: bold; }
+        .bubble:active { transform: scale(0.9); background: var(--neon-blue); }
+        .bubble.popped { transform: scale(0.5); opacity: 0; transition: transform 0.1s, opacity 0.2s; }
 
-        /* --- BLOB FRIEND --- */
-        .blob-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: var(--glass); padding: 30px; border-radius: 30px; border: 1px solid var(--glass-border);
-        }
-        .blob-wrapper {
-            width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; transition: 0.3s;
-        }
-        #theBlob {
-            width: 100px; height: 100px; background: var(--neon-pink);
-            border-radius: 50%; transition: all 0.5s ease;
-            box-shadow: 0 0 30px rgba(0,0,0,0.2);
-            position: relative; display: flex; justify-content: center; align-items: center;
-        }
-        /* Eyes */
-        #theBlob::before, #theBlob::after {
-            content: ''; width: 12px; height: 12px; background: #000; border-radius: 50%;
-            position: absolute; top: 35%; animation: blink 4s infinite;
-        }
-        #theBlob::before { left: 30%; } #theBlob::after { right: 30%; }
-        @keyframes blink { 0%, 96%, 100% { transform: scaleY(1); } 98% { transform: scaleY(0.1); } }
-
-        .speech-bubble {
-            background: white; color: #333; padding: 15px; border-radius: 15px;
-            margin-bottom: 20px; font-size: 0.9rem; position: relative; text-align: center;
-            min-height: 60px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .speech-bubble::after {
-            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
-            border-width: 10px 10px 0; border-style: solid; border-color: white transparent transparent;
-        }
-        
-        .blob-controls { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .control-btn {
-            background: rgba(255,255,255,0.1); border: none; padding: 10px;
-            color: white; border-radius: 10px; font-size: 0.8rem; cursor: pointer;
+        /* --- PHYSICS (Fling) --- */
+        #gravityCanvas {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+            border: 1px solid var(--glass-border);
         }
 
-        /* --- BREATHING --- */
+        /* --- BREATHING (Pranayama) --- */
         .breathe-container {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 300px; position: relative;
+            height: 280px; position: relative; margin-top: 10px;
         }
         .lung {
-            width: 160px; height: 160px;
-            background: conic-gradient(from 0deg, #818cf8, #38bdf8, #818cf8);
+            width: 140px; height: 140px;
+            background: conic-gradient(from 0deg, #818cf8, #c084fc, #818cf8);
             border-radius: 50%;
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 50px rgba(129, 140, 248, 0.3);
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; color: white; text-align: center;
-            transform: scale(1);
-            position: absolute; z-index: 2;
+            font-size: 1.1rem; color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 4s ease-in-out;
+            z-index: 2; position: absolute;
         }
-        .lung-guide { margin-top: 240px; font-size: 1.1rem; color: var(--neon-blue); min-height: 1.5rem;}
-        .breath-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px;
+        .lung-guide {
+            margin-top: 220px; font-size: 1.1rem; font-weight: 500; color: var(--accent); letter-spacing: 1px;
+        }
+        
+        /* Breath Controls */
+        .breath-options {
+            display: flex; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 20px;
         }
         .breath-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.8); padding: 8px; border-radius: 12px; font-size: 0.8rem;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.8rem;
         }
-        .breath-btn.selected { background: var(--accent); border-color: var(--accent); color: white; font-weight: bold; }
+        .breath-btn.selected { background: var(--accent); border-color: var(--accent); font-weight: bold; }
 
-        /* --- TRAVEL --- */
-        #horizonCanvas { background: #000; border-radius: 20px; display: block; margin: 0 auto; border: 2px solid #333; }
-        .travel-tools { margin-top: 15px; text-align: center; }
-        .focus-dot {
-            width: 20px; height: 20px; background: var(--neon-green); border-radius: 50%;
-            margin: 0 auto; animation: pulse 2s infinite; display: none;
+        .posture-toggle {
+            text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.5); 
+            text-decoration: underline; cursor: pointer; margin-top: 10px;
         }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
+        .posture-info {
+            display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;
+            margin-top: 10px; font-size: 0.85rem; line-height: 1.4; text-align: left;
+            border-left: 3px solid var(--accent);
+        }
+        .posture-info strong { color: var(--neon-blue); display: block; margin-bottom: 4px; }
+
+        /* --- CAR SICKNESS (Horizon) --- */
+        #horizonCanvas {
+            background: #000;
+            border-radius: 20px;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #333;
+        }
+        .sensor-btn {
+            display: block; margin: 20px auto; padding: 12px 24px;
+            background: var(--neon-green); color: #064e3b; border: none;
+            border-radius: 25px; font-weight: bold; font-size: 1rem;
+        }
+
+        /* --- AUDIO --- */
+        .noise-card {
+            background: rgba(255,255,255,0.05); border-radius: 15px; padding: 15px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+        }
+        .noise-card.playing { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.1); }
+        .indicator { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
+        .playing .indicator { background: var(--neon-blue); box-shadow: 0 0 8px var(--neon-blue); }
 
     </style>
 </head>
 <body>
 
-<header>
-    <div class="title">the nest</div>
-    <div class="gentle-msg" id="headerMsg">welcome home</div>
-</header>
+<header>the nest</header>
 
 <nav>
-    <button class="active" onclick="showSection('draw')">draw</button>
-    <button onclick="showSection('fling')">hoops</button>
-    <button onclick="showSection('friend')">friend</button>
+    <button class="active" onclick="showSection('mist')">mist</button>
+    <button onclick="showSection('pop')">pops</button>
+    <button onclick="showSection('gravity')">fling</button>
     <button onclick="showSection('breath')">breathe</button>
-    <button onclick="showSection('travel')">travel</button>
+    <button onclick="showSection('car')">travel</button>
+    <button onclick="showSection('audio')">noise</button>
 </nav>
 
 <main>
-    <section id="draw" class="active">
-        <p class="desc">create. it stays until you clear it.</p>
-        <canvas id="drawCanvas" width="340" height="420"></canvas>
-        <div class="palette">
-            <div class="color-dot active" style="background:#38bdf8" onclick="setColor('#38bdf8', this)"></div>
-            <div class="color-dot" style="background:#f472b6" onclick="setColor('#f472b6', this)"></div>
-            <div class="color-dot" style="background:#34d399" onclick="setColor('#34d399', this)"></div>
-            <div class="color-dot" style="background:#fbbf24" onclick="setColor('#fbbf24', this)"></div>
-            <button class="clear-btn" onclick="clearCanvas()">Clear</button>
-        </div>
+    <section id="mist" class="active">
+        <p class="desc">trace the light. purely visual. no sound.</p>
+        <canvas id="mistCanvas" width="340" height="420"></canvas>
     </section>
 
-    <section id="fling">
-        <p class="desc">fling the glowing orbs into the hoop.</p>
-        <canvas id="gameCanvas" width="340" height="420"></canvas>
-        <div class="score-board">Score: <span id="scoreVal">0</span></div>
+    <section id="pop">
+        <p class="desc">neon pops. tap to ground yourself.</p>
+        <div class="grid" id="bubbleGrid"></div>
     </section>
 
-    <section id="friend">
-        <div class="blob-container">
-            <div class="speech-bubble" id="blobText">Hi! I'm here to listen.</div>
-            <div class="blob-wrapper">
-                <div id="theBlob"></div>
-            </div>
-            
-            <div class="blob-controls">
-                <button class="control-btn" onclick="customizeBlob('color')">Change Color</button>
-                <button class="control-btn" onclick="customizeBlob('shape')">Change Shape</button>
-                <button class="control-btn" style="grid-column: span 2; background: rgba(255,255,255,0.2)" onclick="blobTalk()">Ask for support</button>
-            </div>
-        </div>
+    <section id="gravity">
+        <p class="desc">fling the orbs. watch them bounce.</p>
+        <canvas id="gravityCanvas" width="340" height="400"></canvas>
     </section>
 
     <section id="breath">
-        <div class="breath-grid">
+        <div class="breath-options">
             <button class="breath-btn selected" onclick="setBreathMode('relax', this)">Relax (4-7-8)</button>
             <button class="breath-btn" onclick="setBreathMode('box', this)">Focus (Box)</button>
-            <button class="breath-btn" onclick="setBreathMode('ujjayi', this)">Ujjayi (Ocean)</button>
-            <button class="breath-btn" onclick="setBreathMode('nadi', this)">Nadi Shodhana</button>
-            <button class="breath-btn" onclick="setBreathMode('bhastrika', this)">Bhastrika (Energy)</button>
+            <button class="breath-btn" onclick="setBreathMode('balance', this)">Balance (6-6)</button>
         </div>
 
         <div class="breathe-container">
-            <div class="lung" id="lungCircle">Tap<br>Start</div>
-            <div class="lung-guide" id="lungText">Select a mode</div>
+            <div class="lung" id="lungCircle">Breathe</div>
+            <div class="lung-guide" id="lungText">Tap to Start</div>
         </div>
-        <p class="desc" style="font-size:0.7rem; margin-top:20px; opacity:0.5">Wellness aid only.</p>
+
+        <div class="posture-toggle" onclick="togglePosture()">research: correct posture guide ▾</div>
+        <div class="posture-info" id="postureInfo">
+            <strong>1. The Base</strong>
+            Sit with "sit bones" pressed down. If in a chair, feet flat on the floor. If on a bed, cross-legged with hips higher than knees (use a pillow).
+            <br><br>
+            <strong>2. The Spine</strong>
+            Imagine a string pulling the crown of your head to the ceiling. A straight spine allows the diaphragm to move fully without compression.
+            <br><br>
+            <strong>3. The Chin</strong>
+            Tuck your chin slightly (Jalandhara Bandha). This lengthens the back of the neck and stimulates the vagus nerve to reduce nausea and anxiety.
+        </div>
     </section>
 
-    <section id="travel">
-        <p class="desc">motion sickness relief</p>
-        <canvas id="horizonCanvas" width="340" height="300"></canvas>
-        <div class="travel-tools">
-            <p style="font-size: 0.8rem; color: var(--neon-green)">Focus on the green dot.</p>
-            <div class="focus-dot" id="focusDot" style="display:block;"></div>
-            <button class="control-btn" style="margin-top:10px; width:100%" onclick="requestSensors()">Enable Sensors (iOS)</button>
+    <section id="car">
+        <p class="desc">artificial horizon for motion sickness.</p>
+        <p class="desc" style="font-size:0.75rem; color:var(--neon-green)">Keep the green line flat with the earth.</p>
+        
+        <canvas id="horizonCanvas" width="340" height="340"></canvas>
+        
+        <button class="sensor-btn" id="sensorBtn" onclick="requestSensors()">Enable Sensors (iOS)</button>
+        <p style="font-size: 0.7rem; text-align: center; opacity: 0.5;">If on iPhone, tap above. Android works automatically.</p>
+    </section>
+
+    <section id="audio">
+        <p class="desc">calming frequencies</p>
+        
+        <div class="noise-card" id="greenBtn" onclick="toggleNoise('green')">
+            <div><h3>Green Noise</h3><span style="font-size:0.7rem; opacity:0.6">Nature / Waterfall</span></div><div class="indicator"></div>
+        </div>
+        <div class="noise-card" id="brownBtn" onclick="toggleNoise('brown')">
+            <div><h3>Brown Noise</h3><span style="font-size:0.7rem; opacity:0.6">Deep / Rumble</span></div><div class="indicator"></div>
+        </div>
+        <div class="noise-card" id="pinkBtn" onclick="toggleNoise('pink')">
+            <div><h3>Pink Noise</h3><span style="font-size:0.7rem; opacity:0.6">Rain / Wind</span></div><div class="indicator"></div>
         </div>
     </section>
 </main>
 
 <script>
-    function vibrate(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
-    
-    /* --- HEADER MESSAGES --- */
-    const messages = [
-        "You are doing enough.", "Soft front, strong back.", "Just breathe.",
-        "You are safe.", "This feeling will change.", "Kindness starts with you."
-    ];
-    setInterval(() => {
-        const msg = messages[Math.floor(Math.random() * messages.length)];
-        const el = document.getElementById('headerMsg');
-        el.style.opacity = 0;
-        setTimeout(() => { el.innerText = msg; el.style.opacity = 0.9; }, 500);
-    }, 8000);
+    let audioCtx;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
 
-    /* --- NAV --- */
+    // Vibration Helper (Android only, ignored by iOS)
+    function vibrate(ms) {
+        if(navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    /* --- NAVIGATION --- */
     function showSection(id) {
         document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -272,32 +294,26 @@
         const targetBtn = btns.find(b => b.getAttribute('onclick').includes(id));
         if(targetBtn) targetBtn.classList.add('active');
 
-        // Force stop breathing when leaving tab to fix overlap
-        if(id !== 'breath') forceStopBreathing(); 
-        
-        if(id === 'travel') startHorizon(); else stopHorizon();
+        if (id !== 'breath') stopBreathing();
+        if (id !== 'car') stopHorizon();
+        if (id === 'car') startHorizon();
     }
 
-    /* --- 1. DRAWING (PERSISTENT) --- */
-    const dCanvas = document.getElementById('drawCanvas');
-    const dCtx = dCanvas.getContext('2d');
-    let dColor = '#38bdf8';
-    let dDrawing = false;
+    /* --- 1. MIST (NO SOUND) --- */
+    const mCanvas = document.getElementById('mistCanvas');
+    const mCtx = mCanvas.getContext('2d');
+    
+    mCtx.shadowBlur = 15; mCtx.shadowColor = "#38bdf8"; 
+    mCtx.lineJoin = 'round'; mCtx.lineCap = 'round'; mCtx.lineWidth = 30; 
+    let mDrawing = false;
 
-    // Canvas Setup
-    dCtx.lineCap = 'round'; dCtx.lineJoin = 'round'; dCtx.lineWidth = 6;
-    dCtx.shadowBlur = 10; dCtx.shadowColor = dColor;
-
-    function setColor(c, el) {
-        dColor = c;
-        dCtx.shadowColor = c;
-        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-        el.classList.add('active');
+    function mistLoop() {
+        mCtx.globalCompositeOperation = 'source-over';
+        mCtx.fillStyle = 'rgba(17, 24, 39, 0.02)'; 
+        mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
+        requestAnimationFrame(mistLoop);
     }
-
-    function clearCanvas() {
-        dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
-    }
+    mistLoop();
 
     function getPos(e, c) {
         const rect = c.getBoundingClientRect();
@@ -306,297 +322,328 @@
         return {x, y};
     }
 
-    dCanvas.addEventListener('pointerdown', (e) => {
-        dDrawing = true;
-        const p = getPos(e, dCanvas);
-        dCtx.beginPath(); dCtx.moveTo(p.x, p.y);
+    mCanvas.addEventListener('pointerdown', (e) => {
+        mDrawing = true;
+        const p = getPos(e, mCanvas);
+        mCtx.beginPath(); mCtx.moveTo(p.x, p.y);
     });
-    dCanvas.addEventListener('pointermove', (e) => {
-        if(!dDrawing) return;
-        const p = getPos(e, dCanvas);
-        dCtx.lineTo(p.x, p.y);
-        dCtx.strokeStyle = dColor;
-        dCtx.stroke();
+
+    mCanvas.addEventListener('pointermove', (e) => {
+        if (!mDrawing) return;
+        const p = getPos(e, mCanvas);
+        mCtx.lineTo(p.x, p.y);
+        mCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        mCtx.stroke();
     });
-    dCanvas.addEventListener('pointerup', () => dDrawing = false);
+    mCanvas.addEventListener('pointerup', () => mDrawing = false);
 
-
-    /* --- 2. BASKETBALL FLING --- */
-    const gCanvas = document.getElementById('gameCanvas');
+    /* --- 2. PHYSICS (FLING) --- */
+    const gCanvas = document.getElementById('gravityCanvas');
     const gCtx = gCanvas.getContext('2d');
     let balls = [];
-    let score = 0;
-    
-    // Create Hoop
-    const hoop = { x: 250, y: 150, r: 25 }; 
 
-    // Create 4 Glowing Orbs
-    for(let i=0; i<4; i++) {
+    for(let i=0; i<8; i++) {
         balls.push({
-            x: Math.random()*100 + 50, y: 300,
-            vx: 0, vy: 0,
-            r: 12, hue: Math.random()*360
+            x: Math.random() * gCanvas.width, y: Math.random() * gCanvas.height,
+            vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+            r: 12 + Math.random() * 8, hue: Math.random() * 360
         });
     }
 
-    let draggedBall = null;
+    let draggedBall = null; let draggedPos = null;
 
-    function gameLoop() {
-        gCtx.clearRect(0,0,gCanvas.width, gCanvas.height);
-        
-        // Draw Hoop
-        gCtx.beginPath();
-        gCtx.arc(hoop.x, hoop.y, hoop.r, 0, Math.PI*2);
-        gCtx.strokeStyle = 'rgba(255,255,255,0.3)';
-        gCtx.lineWidth = 4;
-        gCtx.stroke();
-        
-        // Hoop "Net" glow
-        gCtx.shadowBlur = 20;
-        gCtx.shadowColor = '#34d399';
-        gCtx.beginPath();
-        gCtx.moveTo(hoop.x - hoop.r, hoop.y);
-        gCtx.lineTo(hoop.x + hoop.r, hoop.y);
-        gCtx.stroke();
-        gCtx.shadowBlur = 0; // Reset for balls to have their own glow
-
+    function physicsLoop() {
+        gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
         balls.forEach(b => {
-            if(b !== draggedBall) {
-                b.vy += 0.4; // Gravity
-                b.x += b.vx; b.y += b.vy;
-                b.vx *= 0.99; b.vy *= 0.99; // Air resistance
-
-                // Bounce walls
-                if(b.y + b.r > 420) { b.y = 420 - b.r; b.vy *= -0.7; }
-                if(b.y - b.r < 0) { b.y = b.r; b.vy *= -0.7; }
-                if(b.x + b.r > 340) { b.x = 340 - b.r; b.vx *= -0.7; }
-                if(b.x - b.r < 0) { b.x = b.r; b.vx *= -0.7; }
-
-                // Scoring Logic (Simple: if ball falls into hoop area)
-                let dist = Math.hypot(b.x - hoop.x, b.y - hoop.y);
-                if(dist < hoop.r && b.vy > 0 && b.y < hoop.y + 10 && b.y > hoop.y - 10) {
-                    // Score!
-                    score++;
-                    document.getElementById('scoreVal').innerText = score;
-                    // Reset ball
-                    b.x = 50 + Math.random()*100;
-                    b.y = 350;
-                    b.vx = 0; b.vy = -5; // Pop it up slightly
-                    vibrate([50,50]);
-                }
+            if (b !== draggedBall) {
+                b.vy += 0.4; b.x += b.vx; b.y += b.vy;
+                b.vx *= 0.995; b.vy *= 0.995;
+                if (b.y + b.r > gCanvas.height) { b.y = gCanvas.height - b.r; b.vy *= -0.85; }
+                if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.85; }
+                if (b.x + b.r > gCanvas.width) { b.x = gCanvas.width - b.r; b.vx *= -0.85; }
+                if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.85; }
             }
-
-            // Draw Glowing Orb
             gCtx.beginPath();
-            gCtx.shadowBlur = 25; // HIGH GLOW
-            gCtx.shadowColor = `hsl(${b.hue}, 100%, 70%)`;
-            gCtx.fillStyle = `hsl(${b.hue}, 100%, 85%)`;
-            gCtx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-            gCtx.fill();
-            gCtx.shadowBlur = 0;
+            gCtx.shadowBlur = 15; gCtx.shadowColor = `hsl(${b.hue}, 80%, 60%)`;
+            gCtx.fillStyle = `hsl(${b.hue}, 80%, 70%)`;
+            gCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+            gCtx.fill(); gCtx.shadowBlur = 0;
         });
 
-        // Draw drag line
-        if(draggedBall && draggedPos) {
-            gCtx.beginPath();
-            gCtx.moveTo(draggedBall.x, draggedBall.y);
+        if (draggedBall && draggedPos) {
+            gCtx.beginPath(); gCtx.moveTo(draggedBall.x, draggedBall.y);
             gCtx.lineTo(draggedPos.x, draggedPos.y);
-            gCtx.strokeStyle = "rgba(255,255,255,0.4)";
-            gCtx.lineWidth = 2;
-            gCtx.stroke();
+            gCtx.strokeStyle = "rgba(255,255,255,0.5)"; gCtx.lineWidth = 2; gCtx.stroke();
         }
-
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(physicsLoop);
     }
-    gameLoop();
+    physicsLoop();
 
-    let draggedPos = null;
     gCanvas.addEventListener('pointerdown', (e) => {
         const p = getPos(e, gCanvas);
         draggedPos = p;
         balls.forEach(b => {
-            if(Math.hypot(p.x-b.x, p.y-b.y) < b.r*3) draggedBall = b;
+            if (Math.sqrt((p.x - b.x)**2 + (p.y - b.y)**2) < b.r * 3) {
+                draggedBall = b; vibrate(10);
+            }
         });
     });
-    gCanvas.addEventListener('pointermove', (e) => {
-        if(draggedBall) draggedPos = getPos(e, gCanvas);
-    });
+
+    gCanvas.addEventListener('pointermove', (e) => { if (draggedBall) draggedPos = getPos(e, gCanvas); });
     gCanvas.addEventListener('pointerup', (e) => {
-        if(draggedBall && draggedPos) {
+        if (draggedBall && draggedPos) {
             const p = getPos(e, gCanvas);
-            // Fling physics
-            draggedBall.vx = (draggedBall.x - p.x) * 0.25;
-            draggedBall.vy = (draggedBall.y - p.y) * 0.25;
+            draggedBall.vx = (draggedBall.x - p.x) * 0.25; draggedBall.vy = (draggedBall.y - p.y) * 0.25;
+            vibrate(15);
         }
         draggedBall = null; draggedPos = null;
     });
 
-
-    /* --- 3. BLOB FRIEND --- */
-    const blob = document.getElementById('theBlob');
-    const bubble = document.getElementById('blobText');
-    const blobMsgs = [
-        "I'm listening.", "You matter.", "Big breath in...",
-        "I'm not going anywhere.", "We can sit here as long as you want."
-    ];
-
-    function customizeBlob(type) {
-        if(type === 'color') {
-            const h = Math.floor(Math.random() * 360);
-            blob.style.backgroundColor = `hsl(${h}, 70%, 60%)`;
-        } else if (type === 'shape') {
-            const r = () => Math.floor(Math.random() * 50) + 20;
-            blob.style.borderRadius = `${r()}% ${r()}% ${r()}% ${r()}%`;
-        }
+    /* --- 3. BUBBLES --- */
+    const grid = document.getElementById('bubbleGrid');
+    for (let i = 0; i < 20; i++) {
+        const b = document.createElement('div');
+        b.className = 'bubble';
+        b.onclick = () => {
+            initAudio(); playPop(300 + Math.random() * 400); vibrate(30);
+            b.classList.add('popped');
+            setTimeout(() => { b.classList.remove('popped'); }, 1000); 
+        };
+        grid.appendChild(b);
     }
 
-    function blobTalk() {
-        const txt = blobMsgs[Math.floor(Math.random() * blobMsgs.length)];
-        bubble.innerText = txt;
-        blob.style.transform = "scale(1.2)";
-        setTimeout(() => blob.style.transform = "scale(1)", 300);
-        vibrate(20);
+    function playPop(freq) {
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(freq * 0.01, audioCtx.currentTime + 0.15);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + 0.15);
     }
 
-
-    /* --- 4. BREATHING (FIXED RESTART) --- */
-    let bActive = false;
-    let bMode = 'relax';
+    /* --- 4. BREATHING (MODES) --- */
     const lung = document.getElementById('lungCircle');
-    const lungTxt = document.getElementById('lungText');
-    let bTimeouts = []; // Array to hold all timers for easy clearing
+    const lungText = document.getElementById('lungText');
+    const postureInfo = document.getElementById('postureInfo');
+    let breathingActive = false;
+    let breathMode = 'relax'; // relax, box, balance
+    let breathTimeout;
 
-    lung.onclick = () => { if(bActive) forceStopBreathing(); else startBreathing(); };
+    lung.onclick = toggleBreathing;
+    lungText.onclick = toggleBreathing;
 
-    function setBreathMode(m, btn) {
-        forceStopBreathing(); // Crucial: Stop everything before switching
-        bMode = m;
+    function togglePosture() {
+        postureInfo.style.display = postureInfo.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function setBreathMode(mode, btn) {
+        stopBreathing();
+        breathMode = mode;
         document.querySelectorAll('.breath-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        
-        // Update helper text immediately
-        if(m === 'ujjayi') lungTxt.innerText = "Ocean Breath (Throat)";
-        else if(m === 'nadi') lungTxt.innerText = "Alt Nostril";
-        else if(m === 'bhastrika') lungTxt.innerText = "Bellows (Fast)";
-        else lungTxt.innerText = "Tap to Start";
     }
+
+    function toggleBreathing() { if(breathingActive) stopBreathing(); else startBreathing(); }
 
     function startBreathing() {
-        bActive = true;
-        vibrate(30);
-        runBreath();
+        breathingActive = true;
+        vibrate(50);
+        runBreathCycle();
     }
 
-    function runBreath() {
-        if(!bActive) return;
+    function runBreathCycle() {
+        if(!breathingActive) return;
+
+        // Configurations
+        let inhaleT, hold1T, exhaleT, hold2T;
         
-        if(bMode === 'relax') { // 4-7-8
-            animateLung("Inhale", 1.5, 4000, () => {
-                animateLung("Hold", 1.5, 7000, () => {
-                    animateLung("Exhale", 1, 8000, runBreath);
-                });
-            });
-        } 
-        else if(bMode === 'box') { // 4-4-4-4
-            animateLung("Inhale", 1.5, 4000, () => {
-                animateLung("Hold", 1.5, 4000, () => {
-                    animateLung("Exhale", 1, 4000, () => {
-                        animateLung("Hold", 1, 4000, runBreath);
-                    });
-                });
-            });
+        if (breathMode === 'relax') { // 4-7-8
+            inhaleT = 4000; hold1T = 7000; exhaleT = 8000; hold2T = 0;
+        } else if (breathMode === 'box') { // 4-4-4-4
+            inhaleT = 4000; hold1T = 4000; exhaleT = 4000; hold2T = 4000;
+        } else if (breathMode === 'balance') { // 6-6 (Coherent)
+            inhaleT = 6000; hold1T = 0; exhaleT = 6000; hold2T = 0;
         }
-        else if(bMode === 'ujjayi') { // 6-6
-            animateLung("Inhale (Ocean)", 1.4, 6000, () => {
-                animateLung("Exhale (Ocean)", 1, 6000, runBreath);
-            });
-        }
-        else if(bMode === 'bhastrika') { // Fast
-            animateLung("In!", 1.2, 1000, () => {
-                animateLung("Out!", 1, 1000, runBreath);
-            });
-        }
-        else if(bMode === 'nadi') { // Complex
-            animateLung("Close Right\nInhale Left", 1.3, 4000, () => {
-                animateLung("Close Left\nExhale Right", 1, 4000, () => {
-                    animateLung("Keep Left Closed\nInhale Right", 1.3, 4000, () => {
-                        animateLung("Close Right\nExhale Left", 1, 4000, runBreath);
-                    });
-                });
-            });
+
+        // INHALE
+        lungText.innerText = "Inhale";
+        lung.style.transition = `transform ${inhaleT}ms ease-in-out`;
+        lung.style.transform = "scale(1.5)";
+        
+        breathTimeout = setTimeout(() => {
+            if(!breathingActive) return;
+            
+            // HOLD 1
+            if(hold1T > 0) {
+                lungText.innerText = "Hold";
+                setTimeout(doExhale, hold1T);
+            } else {
+                doExhale();
+            }
+
+        }, inhaleT);
+
+        function doExhale() {
+            if(!breathingActive) return;
+            lungText.innerText = "Exhale";
+            lung.style.transition = `transform ${exhaleT}ms ease-in-out`;
+            lung.style.transform = "scale(1)";
+            
+            breathTimeout = setTimeout(() => {
+                if(!breathingActive) return;
+
+                // HOLD 2 (Box breath only)
+                if(hold2T > 0) {
+                    lungText.innerText = "Hold";
+                    setTimeout(runBreathCycle, hold2T);
+                } else {
+                    runBreathCycle();
+                }
+            }, exhaleT);
         }
     }
 
-    function animateLung(text, scale, time, callback) {
-        if(!bActive) return;
-        lungTxt.innerText = text;
-        lung.style.transition = `transform ${time}ms ease-in-out`;
-        lung.style.transform = `scale(${scale})`;
-        
-        // Push timeout to array so we can clear it later
-        const id = setTimeout(callback, time);
-        bTimeouts.push(id);
-    }
-
-    function forceStopBreathing() {
-        bActive = false;
-        // Clear ALL pending timeouts immediately
-        bTimeouts.forEach(id => clearTimeout(id));
-        bTimeouts = [];
-        
-        // Reset Visuals immediately
-        lung.style.transition = "transform 0.3s"; 
+    function stopBreathing() {
+        breathingActive = false;
+        clearTimeout(breathTimeout);
+        lungText.innerText = "Tap to Start";
         lung.style.transform = "scale(1)";
-        lungTxt.innerText = "Tap to Start";
     }
 
-
-    /* --- 5. TRAVEL (HORIZON) --- */
+    /* --- 5. CAR SICKNESS (HORIZON) --- */
     const hCanvas = document.getElementById('horizonCanvas');
     const hCtx = hCanvas.getContext('2d');
-    let hReq; let roll = 0;
+    let hReq;
+    let currentRoll = 0;
 
     function requestSensors() {
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission()
-                .then(r => { if(r==='granted') startHorizon(); })
+                .then(response => {
+                    if (response === 'granted') {
+                        document.getElementById('sensorBtn').style.display = 'none';
+                        startHorizon();
+                    } else {
+                        alert('Permission needed for horizon');
+                    }
+                })
                 .catch(console.error);
-        } else { startHorizon(); }
+        } else {
+            // Android/Non-iOS logic
+            document.getElementById('sensorBtn').style.display = 'none';
+            startHorizon();
+        }
     }
 
-    function startHorizon() {
-        window.addEventListener('deviceorientation', (e) => { if(e.gamma) roll = e.gamma; });
-        if(!hReq) drawHorizon();
-    }
-    function stopHorizon() {
-        cancelAnimationFrame(hReq); hReq = null;
+    function handleOrientation(e) {
+        // Gamma is left/right tilt (roll)
+        if(e.gamma !== null) currentRoll = e.gamma;
     }
 
     function drawHorizon() {
-        const w = 340, h = 300;
+        const w = hCanvas.width;
+        const h = hCanvas.height;
         hCtx.clearRect(0,0,w,h);
+
         hCtx.save();
         hCtx.translate(w/2, h/2);
-        hCtx.rotate(-roll * Math.PI / 180);
-        
-        // Sky/Ground
-        hCtx.fillStyle = '#1e293b'; hCtx.fillRect(-w, -h, 2*w, h);
-        hCtx.fillStyle = '#0f172a'; hCtx.fillRect(-w, 0, 2*w, h);
-        
-        // Line
+        // Rotate opposite to device to keep line flat
+        hCtx.rotate(-currentRoll * Math.PI / 180);
+
+        // Draw Sky/Ground split
+        hCtx.fillStyle = '#333';
+        hCtx.fillRect(-w, -h, w*2, h); // Top half
+        hCtx.fillStyle = '#111';
+        hCtx.fillRect(-w, 0, w*2, h); // Bottom half
+
+        // The Horizon Line
+        hCtx.shadowBlur = 20;
+        hCtx.shadowColor = '#34d399';
         hCtx.fillStyle = '#34d399';
-        hCtx.shadowBlur = 10; hCtx.shadowColor = '#34d399';
-        hCtx.fillRect(-w, -2, 2*w, 4);
+        hCtx.fillRect(-w, -2, w*2, 4);
+
         hCtx.restore();
 
-        // Crosshair
+        // Crosshair (Fixed to phone)
         hCtx.shadowBlur = 0;
-        hCtx.strokeStyle = 'white'; hCtx.lineWidth=2;
+        hCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+        hCtx.lineWidth = 2;
         hCtx.beginPath();
-        hCtx.arc(w/2, h/2, 5, 0, Math.PI*2);
+        hCtx.moveTo(w/2, h/2 - 20); hCtx.lineTo(w/2, h/2 + 20);
+        hCtx.moveTo(w/2 - 20, h/2); hCtx.lineTo(w/2 + 20, h/2);
         hCtx.stroke();
 
         hReq = requestAnimationFrame(drawHorizon);
+    }
+
+    function startHorizon() {
+        window.addEventListener('deviceorientation', handleOrientation);
+        if(!hReq) drawHorizon();
+    }
+    function stopHorizon() {
+        window.removeEventListener('deviceorientation', handleOrientation);
+        cancelAnimationFrame(hReq);
+        hReq = null;
+    }
+
+    /* --- 6. AUDIO GEN --- */
+    let noiseNode = null;
+    let currentNoiseType = null;
+
+    function toggleNoise(type) {
+        initAudio();
+        if (noiseNode && currentNoiseType === type) { stopNoise(); return; }
+        stopNoise(); currentNoiseType = type;
+        
+        const bufferSize = 2 * audioCtx.sampleRate;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = buffer.getChannelData(0);
+
+        // Brown noise generation logic
+        let lastOut = 0.0;
+        for (let i = 0; i < bufferSize; i++) {
+            let white = Math.random() * 2 - 1;
+            if (type === 'brown') {
+                output[i] = (lastOut + (0.02 * white)) / 1.002 * 3.5;
+                lastOut = output[i];
+                output[i] *= 3.5; 
+            } else {
+                output[i] = white; // White base for others
+            }
+        }
+
+        noiseNode = audioCtx.createBufferSource();
+        noiseNode.buffer = buffer;
+        noiseNode.loop = true;
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 1);
+
+        if (type === 'green') {
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass'; filter.frequency.value = 600;
+            noiseNode.connect(filter); filter.connect(gain);
+        } else if (type === 'pink') {
+             // Simple pinking filter
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass'; filter.frequency.value = 1000;
+            noiseNode.connect(filter); filter.connect(gain);
+        } else {
+            noiseNode.connect(gain);
+        }
+
+        gain.connect(audioCtx.destination);
+        noiseNode.start();
+        document.getElementById(type + 'Btn').classList.add('playing');
+        vibrate(30);
+    }
+
+    function stopNoise() {
+        if (noiseNode) { noiseNode.stop(); noiseNode = null; }
+        document.querySelectorAll('.noise-card').forEach(c => c.classList.remove('playing'));
+        currentNoiseType = null;
     }
 </script>
 </body>
