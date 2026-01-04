@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Nest | Deep Space</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Twilight / Dark Theme for better contrast */
+            --bg-top: #0f172a;
+            --bg-bottom: #1e1b4b;
+            --glass: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text: #e2e8f0;
+            --accent: #818cf8;
+            --neon-blue: #38bdf8;
+            --neon-pink: #f472b6;
+        }
+
+        * { box-sizing: border-box; font-family: 'Quicksand', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 20px 5px;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: lowercase;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Nav */
+        nav {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            padding: 15px 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        nav::-webkit-scrollbar { display: none; }
+
+        nav button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+            color: rgba(255,255,255,0.6);
+            flex-shrink: 0;
+        }
+
+        nav button.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(129, 140, 248, 0.4);
+        }
+
+        main {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            padding-bottom: 30px;
+        }
+
+        section {
+            display: none;
+            padding: 10px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .desc { text-align: center; font-size: 0.85rem; opacity: 0.5; margin-bottom: 20px; margin-top: 0; }
+
+        /* --- MIST (High Contrast) --- */
+        #mistCanvas {
+            background: #111827; /* Dark background */
+            border-radius: 20px;
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- POPS (High Contrast) --- */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .bubble {
+            aspect-ratio: 1;
+            background: #1e293b;
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+            cursor: pointer;
+            transition: 0.1s;
+            position: relative;
+        }
+        .bubble:active { transform: scale(0.9); background: var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue); }
+        .bubble.popped { 
+            transform: scale(0.5); 
+            opacity: 0; 
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        /* --- PHYSICS (Satisfying) --- */
+        #gravityCanvas {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- BREATHING --- */
+        .breathe-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            position: relative;
+        }
+        .lung {
+            width: 140px; height: 140px;
+            background: conic-gradient(from 0deg, #818cf8, #c084fc, #818cf8);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(129, 140, 248, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 4s ease-in-out;
+            position: absolute;
+            z-index: 2;
+        }
+        .lung::after {
+            content: ''; position: absolute; top:-10px; left:-10px; right:-10px; bottom:-10px;
+            border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); z-index: 1;
+        }
+        .lung-guide {
+            margin-top: 220px; font-size: 1rem; font-weight: 500; color: var(--accent); letter-spacing: 1px;
+        }
+
+        /* --- CLICKS & SLIDERS --- */
+        .slider-bank {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .slider-row {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 15px;
+        }
+        .slider-row:last-child { margin-bottom: 0; }
+        
+        /* Custom styled range input */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 24px; width: 24px;
+            border-radius: 50%; background: var(--neon-pink);
+            cursor: pointer; margin-top: -10px;
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer;
+            background: rgba(255,255,255,0.1); border-radius: 2px;
+        }
+
+        .keyboard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        .key {
+            width: 36px; height: 36px;
+            background: #334155;
+            border-radius: 6px;
+            box-shadow: 0 4px 0 #1e293b;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; color: #94a3b8;
+            cursor: pointer;
+            transition: 0.05s;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .key:active { transform: translateY(4px); box-shadow: 0 0 0 #1e293b; background: var(--accent); color: white; }
+
+        /* --- AUDIO --- */
+        .noise-card {
+            background: rgba(255,255,255,0.05); border-radius: 15px; padding: 15px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+        }
+        .noise-card:hover { background: rgba(255,255,255,0.1); }
+        .noise-card.playing { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.1); }
+        .noise-card h3 { margin: 0; font-size: 0.95rem; font-weight: 500; }
+        .noise-card span { font-size: 0.75rem; opacity: 0.6; }
+        .indicator { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
+        .playing .indicator { background: var(--neon-blue); box-shadow: 0 0 8px var(--neon-blue); }
+
+    </style>
+</head>
+<body>
+
+<header>the nest</header>
+
+<nav>
+    <button class="active" onclick="showSection('mist')">mist</button>
+    <button onclick="showSection('pop')">pops</button>
+    <button onclick="showSection('gravity')">fling</button>
+    <button onclick="showSection('breath')">breathe</button>
+    <button onclick="showSection('click')">fidget</button>
+    <button onclick="showSection('audio')">noise</button>
+</nav>
+
+<main>
+    <section id="mist" class="active">
+        <p class="desc">trace the light. it fades slowly.</p>
+        <canvas id="mistCanvas" width="340" height="420"></canvas>
+    </section>
+
+    <section id="pop">
+        <p class="desc">high contrast pops.</p>
+        <div class="grid" id="bubbleGrid"></div>
+    </section>
+
+    <section id="gravity">
+        <p class="desc">high bounce gravity. throw them.</p>
+        <canvas id="gravityCanvas" width="340" height="400"></canvas>
+    </section>
+
+    <section id="breath">
+        <p class="desc">4-7-8 rhythm</p>
+        <div class="breathe-container">
+            <div class="lung" id="lungCircle">Breathe</div>
+            <div class="lung-guide" id="lungText">Tap to Start</div>
+        </div>
+    </section>
+
+    <section id="click">
+        <p class="desc">mechanical keys & smooth sliders</p>
+        
+        <div class="slider-bank">
+            <div class="slider-row">
+                <input type="range" min="0" max="100" value="0" oninput="playTick(this.value)">
+            </div>
+            <div class="slider-row">
+                <input type="range" min="0" max="100" value="50" oninput="playTick(this.value)">
+            </div>
+            <div class="slider-row">
+                <input type="range" min="0" max="100" value="100" oninput="playTick(this.value)">
+            </div>
+        </div>
+
+        <div class="keyboard-grid" id="keyGrid"></div>
+    </section>
+
+    <section id="audio">
+        <p class="desc">sound spectrum</p>
+        
+        <div class="noise-card" id="greenBtn" onclick="toggleNoise('green')">
+            <div><h3>Green Noise</h3><span>Nature / Waterfall</span></div>
+            <div class="indicator"></div>
+        </div>
+
+        <div class="noise-card" id="brownBtn" onclick="toggleNoise('brown')">
+            <div><h3>Brown Noise</h3><span>Deep / Rumble</span></div>
+            <div class="indicator"></div>
+        </div>
+
+        <div class="noise-card" id="pinkBtn" onclick="toggleNoise('pink')">
+            <div><h3>Pink Noise</h3><span>Rain / Wind</span></div>
+            <div class="indicator"></div>
+        </div>
+
+        <div class="noise-card" id="whiteBtn" onclick="toggleNoise('white')">
+            <div><h3>White Noise</h3><span>Static / Blocking</span></div>
+            <div class="indicator"></div>
+        </div>
+
+        <div class="noise-card" id="violetBtn" onclick="toggleNoise('violet')">
+            <div><h3>Violet Noise</h3><span>High / Crisp</span></div>
+            <div class="indicator"></div>
+        </div>
+    </section>
+</main>
+
+<script>
+    let audioCtx;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        
+        const btns = Array.from(document.querySelectorAll('nav button'));
+        const targetBtn = btns.find(b => b.getAttribute('onclick').includes(id));
+        if(targetBtn) targetBtn.classList.add('active');
+
+        if (id !== 'breath') stopBreathing();
+    }
+
+    /* --- 1. MIST (HIGH VISIBILITY) --- */
+    const mCanvas = document.getElementById('mistCanvas');
+    const mCtx = mCanvas.getContext('2d');
+    
+    mCtx.shadowBlur = 15;
+    mCtx.shadowColor = "#38bdf8"; // Neon blue glow
+    mCtx.lineJoin = 'round';
+    mCtx.lineCap = 'round';
+    mCtx.lineWidth = 30; 
+    
+    let mDrawing = false;
+
+    function mistLoop() {
+        mCtx.globalCompositeOperation = 'source-over';
+        // Very subtle fade to keep trails visible longer
+        mCtx.fillStyle = 'rgba(17, 24, 39, 0.02)'; 
+        mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
+        requestAnimationFrame(mistLoop);
+    }
+    mistLoop();
+
+    function getPos(e, c) {
+        const rect = c.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        return {x, y};
+    }
+
+    mCanvas.addEventListener('pointerdown', (e) => {
+        mDrawing = true;
+        const p = getPos(e, mCanvas);
+        mCtx.beginPath();
+        mCtx.moveTo(p.x, p.y);
+    });
+
+    mCanvas.addEventListener('pointermove', (e) => {
+        if (!mDrawing) return;
+        const p = getPos(e, mCanvas);
+        mCtx.lineTo(p.x, p.y);
+        // Bright White stroke for max contrast
+        mCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        mCtx.stroke();
+    });
+    mCanvas.addEventListener('pointerup', () => mDrawing = false);
+
+
+    /* --- 2. PHYSICS (SATISFYING) --- */
+    const gCanvas = document.getElementById('gravityCanvas');
+    const gCtx = gCanvas.getContext('2d');
+    let balls = [];
+
+    // Create 8 glowing balls
+    for(let i=0; i<8; i++) {
+        balls.push({
+            x: Math.random() * gCanvas.width,
+            y: Math.random() * gCanvas.height,
+            vx: (Math.random() - 0.5) * 6,
+            vy: (Math.random() - 0.5) * 6,
+            r: 12 + Math.random() * 8,
+            hue: Math.random() * 360
+        });
+    }
+
+    let draggedBall = null;
+    let draggedPos = null;
+
+    function physicsLoop() {
+        gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+        
+        balls.forEach(b => {
+            if (b !== draggedBall) {
+                b.vy += 0.4; // Stronger Gravity
+                b.x += b.vx;
+                b.y += b.vy;
+
+                // Friction
+                b.vx *= 0.995;
+                b.vy *= 0.995;
+
+                // Bounce (Higher restitution = more satisfying)
+                if (b.y + b.r > gCanvas.height) { b.y = gCanvas.height - b.r; b.vy *= -0.85; }
+                if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.85; }
+                if (b.x + b.r > gCanvas.width) { b.x = gCanvas.width - b.r; b.vx *= -0.85; }
+                if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.85; }
+            }
+
+            gCtx.beginPath();
+            gCtx.shadowBlur = 15;
+            gCtx.shadowColor = `hsl(${b.hue}, 80%, 60%)`;
+            gCtx.fillStyle = `hsl(${b.hue}, 80%, 70%)`;
+            gCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+            gCtx.fill();
+            gCtx.shadowBlur = 0; // Reset shadow for line
+        });
+
+        if (draggedBall && draggedPos) {
+            gCtx.beginPath();
+            gCtx.moveTo(draggedBall.x, draggedBall.y);
+            gCtx.lineTo(draggedPos.x, draggedPos.y);
+            gCtx.strokeStyle = "rgba(255,255,255,0.5)";
+            gCtx.lineWidth = 2;
+            gCtx.stroke();
+        }
+
+        requestAnimationFrame(physicsLoop);
+    }
+    physicsLoop();
+
+    gCanvas.addEventListener('pointerdown', (e) => {
+        const p = getPos(e, gCanvas);
+        draggedPos = p;
+        balls.forEach(b => {
+            const dist = Math.sqrt((p.x - b.x)**2 + (p.y - b.y)**2);
+            if (dist < b.r * 3) draggedBall = b; // Generous grab radius
+        });
+    });
+
+    gCanvas.addEventListener('pointermove', (e) => {
+        if (draggedBall) draggedPos = getPos(e, gCanvas);
+    });
+
+    gCanvas.addEventListener('pointerup', (e) => {
+        if (draggedBall && draggedPos) {
+            const p = getPos(e, gCanvas);
+            // High velocity multiplier for satisfying fling
+            draggedBall.vx = (draggedBall.x - p.x) * 0.25;
+            draggedBall.vy = (draggedBall.y - p.y) * 0.25;
+        }
+        draggedBall = null;
+        draggedPos = null;
+    });
+
+
+    /* --- 3. BUBBLES --- */
+    const grid = document.getElementById('bubbleGrid');
+    for (let i = 0; i < 20; i++) {
+        const b = document.createElement('div');
+        b.className = 'bubble';
+        b.onclick = () => {
+            initAudio();
+            playPop(300 + Math.random() * 400); // Higher pitch for neon feel
+            b.classList.add('popped');
+            setTimeout(() => {
+                b.classList.remove('popped');
+                b.style.transform = "scale(1)";
+                b.style.opacity = "1";
+            }, 1000); 
+        };
+        grid.appendChild(b);
+    }
+
+    function playPop(freq) {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(freq * 0.01, audioCtx.currentTime + 0.15);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + 0.15);
+    }
+
+
+    /* --- 4. BREATHING --- */
+    const lung = document.getElementById('lungCircle');
+    const lungText = document.getElementById('lungText');
+    let breathingActive = false;
+
+    lung.onclick = toggleBreathing;
+    lungText.onclick = toggleBreathing;
+
+    function toggleBreathing() {
+        if(breathingActive) stopBreathing(); else startBreathing();
+    }
+
+    function startBreathing() {
+        breathingActive = true;
+        lungText.innerText = "Inhale (4)";
+        lung.style.transition = "transform 4s ease-in-out";
+        lung.style.transform = "scale(1.5)";
+        
+        let phase = 0;
+        const runCycle = () => {
+            if(!breathingActive) return;
+            setTimeout(() => {
+                if(!breathingActive) return;
+                lungText.innerText = "Hold (7)";
+                setTimeout(() => {
+                    if(!breathingActive) return;
+                    lungText.innerText = "Exhale (8)";
+                    lung.style.transition = "transform 8s ease-in-out";
+                    lung.style.transform = "scale(1)";
+                    setTimeout(() => {
+                        if(!breathingActive) return;
+                        lungText.innerText = "Inhale (4)";
+                        lung.style.transition = "transform 4s ease-in-out";
+                        lung.style.transform = "scale(1.5)";
+                        runCycle();
+                    }, 8000);
+                }, 7000);
+            }, 4000);
+        };
+        runCycle();
+    }
+
+    function stopBreathing() {
+        breathingActive = false;
+        lungText.innerText = "Tap to Start";
+        lung.style.transform = "scale(1)";
+    }
+
+
+    /* --- 5. KEYS & SLIDERS --- */
+    const keyGrid = document.getElementById('keyGrid');
+    const chars = "QWERTYUIOPASDFGHJKLZXCVBNM";
+    chars.split('').forEach(char => {
+        const k = document.createElement('div');
+        k.className = 'key';
+        k.innerText = char;
+        k.onmousedown = (e) => { e.preventDefault(); clickSound(); };
+        keyGrid.appendChild(k);
+    });
+
+    let lastTick = 0;
+    function playTick(val) {
+        initAudio();
+        // Limit tick rate
+        const now = Date.now();
+        if (now - lastTick < 30) return;
+        lastTick = now;
+
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.frequency.setValueAtTime(800, audioCtx.currentTime);
+        o.type = 'triangle';
+        g.gain.setValueAtTime(0.02, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + 0.03);
+    }
+
+    function clickSound() {
+        initAudio();
+        const bufferSize = audioCtx.sampleRate * 0.05;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1000;
+        const gain = audioCtx.createGain();
+        
+        noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        noise.start();
+    }
+
+
+    /* --- 6. AUDIO (MORE COLORS) --- */
+    let noiseNode = null;
+    let currentNoiseType = null;
+
+    function toggleNoise(type) {
+        initAudio();
+        if (noiseNode && currentNoiseType === type) { stopNoise(); return; }
+        stopNoise();
+        currentNoiseType = type;
+        
+        const bufferSize = 2 * audioCtx.sampleRate;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = buffer.getChannelData(0);
+
+        // Generate White Noise Base
+        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+
+        noiseNode = audioCtx.createBufferSource();
+        noiseNode.buffer = buffer;
+        noiseNode.loop = true;
+
+        // Filters based on Color
+        let finalNode = noiseNode;
+
+        if (type === 'pink') {
+            // Approximation for Pink handled in generation usually, 
+            // but for simplicity we will use a lowpass filter on white noise here for smoother code
+            // Actually, let's use the procedural generation for quality.
+            let b0,b1,b2,b3,b4,b5,b6; b0=b1=b2=b3=b4=b5=b6=0.0;
+            for (let i = 0; i < bufferSize; i++) {
+                let white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                output[i] *= 0.11; b6 = white * 0.115926;
+            }
+        } else if (type === 'brown') {
+            let lastOut = 0.0;
+            for (let i = 0; i < bufferSize; i++) {
+                let white = Math.random() * 2 - 1;
+                let out = (lastOut + (0.02 * white)) / 1.002;
+                output[i] = out * 3.5; lastOut = out;
+            }
+        } else if (type === 'green') {
+            // Green is like Pink but focused on mid-freqs (Nature)
+            // We use White buffer, but apply Bandpass Filter below
+        } else if (type === 'violet') {
+            // Violet is high freq. We use White buffer, apply Highpass below.
+        }
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 1);
+
+        // Apply specific filters
+        if (type === 'green') {
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 1000;
+            noiseNode.connect(filter);
+            filter.connect(gain);
+        } else if (type === 'violet') {
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 2000;
+            noiseNode.connect(filter);
+            filter.connect(gain);
+        } else {
+            noiseNode.connect(gain);
+        }
+
+        gain.connect(audioCtx.destination);
+        noiseNode.start();
+        document.getElementById(type + 'Btn').classList.add('playing');
+    }
+
+    function stopNoise() {
+        if (noiseNode) { noiseNode.stop(); noiseNode = null; }
+        document.querySelectorAll('.noise-card').forEach(c => c.classList.remove('playing'));
+        currentNoiseType = null;
+    }
+</script>
+</body>
+</html>
