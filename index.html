@@ -200,6 +200,21 @@
         }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
 
+        /* --- DREAM (Midnight Pond) --- */
+        #dreamCanvas {
+            background: #050508; border-radius: 20px; display: block; margin: 0 auto;
+            border: 1px solid var(--glass-border); touch-action: none;
+            width: 100%; height: 500px; /* Taller for immersion */
+        }
+        .dream-overlay {
+            position: absolute; top: 120px; left: 0; width: 100%;
+            text-align: center; pointer-events: none;
+            animation: fadeOutText 6s forwards; animation-delay: 2s;
+        }
+        .dream-title { font-size: 1.2rem; letter-spacing: 3px; color: rgba(255,255,255,0.6); margin-bottom: 5px; }
+        .dream-sub { font-size: 0.8rem; letter-spacing: 1px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+        @keyframes fadeOutText { to { opacity: 0; } }
+
     </style>
 </head>
 <body>
@@ -215,6 +230,7 @@
     <button onclick="showSection('friend')">friend</button>
     <button onclick="showSection('breath')">breathe</button>
     <button onclick="showSection('travel')">travel</button>
+    <button onclick="showSection('dream')">sleep</button>
 </nav>
 
 <main>
@@ -259,8 +275,8 @@
 
     <section id="breath">
         <div class="breath-grid">
-            <button class="breath-btn selected" onclick="setBreathMode('relax', this)">Relax (4-7-8)</button>
-            <button class="breath-btn" onclick="setBreathMode('box', this)">Focus (Box)</button>
+            <button class="breath-btn selected" onclick="setBreathMode('relax', this)">Deep Pranayama (4-7-8)</button>
+            <button class="breath-btn" onclick="setBreathMode('box', this)">Box (Focus)</button>
             <button class="breath-btn" onclick="setBreathMode('ujjayi', this)">Ujjayi (Ocean)</button>
             <button class="breath-btn" onclick="setBreathMode('nadi', this)">Nadi Shodhana</button>
             <button class="breath-btn" onclick="setBreathMode('bhastrika', this)">Bhastrika (Energy)</button>
@@ -294,6 +310,14 @@
             <button class="gift-btn" style="margin-top:10px; width:100%; font-size:0.9rem" onclick="requestSensors()">Enable Sensors (iOS)</button>
         </div>
     </section>
+
+    <section id="dream">
+        <div class="dream-overlay" id="dreamText">
+            <div class="dream-title">BREATHE WITH THE LIGHT</div>
+            <div class="dream-sub">Touch to Dream</div>
+        </div>
+        <canvas id="dreamCanvas" width="340" height="500"></canvas>
+    </section>
 </main>
 
 <script>
@@ -321,8 +345,10 @@
         const targetBtn = btns.find(b => b.getAttribute('onclick').includes(id));
         if(targetBtn) targetBtn.classList.add('active');
 
+        // Stop Section Specifics when leaving
         if(id !== 'breath') forceStopBreathing(); 
         if(id === 'travel') startHorizon(); else stopHorizon();
+        if(id === 'dream') startDream(); else stopDream();
     }
 
     /* --- 1. DRAWING --- */
@@ -415,7 +441,6 @@
     }
 
     function giveGift(item) {
-        // Reset item
         blobItem.innerText = "";
         
         if(item === 'coffee') {
@@ -431,13 +456,12 @@
             bubble.innerText = "Do I look stylish?";
         }
         
-        // Happy bounce
         blob.style.transform = "scale(1.2)";
         setTimeout(() => blob.style.transform = "scale(1)", 300);
         vibrate(30);
     }
 
-    /* --- 4. BREATHING (FIXED TEXT & CIRCLES) --- */
+    /* --- 4. BREATHING (DEEP PRANAYAMA) --- */
     let bActive = false;
     let bMode = 'relax';
     const lung = document.getElementById('lungCircle');
@@ -454,8 +478,8 @@
         bMode = m;
         document.querySelectorAll('.breath-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        // Set help text
-        if(m === 'ujjayi') lungTxt.innerText = "Ocean Breath (Throat)";
+        if(m === 'relax') lungTxt.innerText = "Deep Pranayama (4-7-8)";
+        else if(m === 'ujjayi') lungTxt.innerText = "Ocean Breath (Throat)";
         else if(m === 'nadi') lungTxt.innerText = "Alt Nostril";
         else if(m === 'bhastrika') lungTxt.innerText = "Bellows (Fast)";
         else lungTxt.innerText = "Tap to Start";
@@ -470,7 +494,7 @@
     function runBreath() {
         if(!bActive) return;
         
-        if(bMode === 'relax') { // 4-7-8
+        if(bMode === 'relax') { // 4-7-8 Deep Pranayama
             animateLung("Inhale", 1.5, 4000, () => {
                 animateLung("Hold", 1.5, 7000, () => {
                     animateLung("Exhale", 1, 8000, runBreath);
@@ -496,7 +520,7 @@
                 animateLung("Out!", 1, 1000, runBreath);
             });
         }
-        else if(bMode === 'nadi') { // Complex
+        else if(bMode === 'nadi') { // Alt Nostril
             animateLung("Close Right\nInhale Left", 1.3, 4000, () => {
                 animateLung("Close Left\nExhale Right", 1, 4000, () => {
                     animateLung("Keep Left Closed\nInhale Right", 1.3, 4000, () => {
@@ -510,15 +534,10 @@
     function animateLung(text, scale, time, callback) {
         if(!bActive) return;
         lungTxt.innerText = text;
-        
-        // Inner Circle
         lung.style.transition = `transform ${time}ms ease-in-out`;
         lung.style.transform = `scale(${scale})`;
-        
-        // Outer Circle (Delayed slightly for ripple effect)
         lungOuter.style.transition = `transform ${time}ms ease-in-out`;
         lungOuter.style.transform = `scale(${scale * 1.2})`;
-
         const id = setTimeout(callback, time);
         bTimeouts.push(id);
     }
@@ -527,14 +546,12 @@
         bActive = false;
         bTimeouts.forEach(id => clearTimeout(id));
         bTimeouts = [];
-        
         lung.style.transition = "transform 0.3s"; 
         lung.style.transform = "scale(1)";
         lungOuter.style.transition = "transform 0.3s";
         lungOuter.style.transform = "scale(1)";
-        
         lungTxt.innerText = "Tap to Start";
-        lung.innerText = "Tap\nStart"; // Reset inner text
+        lung.innerText = "Tap\nStart"; 
     }
 
 
@@ -564,6 +581,101 @@
         hCtx.fillRect(-w, -2, 2*w, 4); hCtx.restore();
         hCtx.shadowBlur = 0; hCtx.strokeStyle = 'white'; hCtx.lineWidth=2; hCtx.beginPath(); hCtx.arc(w/2, h/2, 5, 0, Math.PI*2); hCtx.stroke();
         hReq = requestAnimationFrame(drawHorizon);
+    }
+
+    /* --- 6. DREAM (MIDNIGHT POND) --- */
+    const mCanvas = document.getElementById('dreamCanvas');
+    const mCtx = mCanvas.getContext('2d');
+    let particles = [], ripples = [], mReq, mTime = 0;
+    // Config
+    const mCfg = { life: 180, bgAlpha: 0.15, colors: ['hsla(220,70%,60%,', 'hsla(260,60%,65%,', 'hsla(190,50%,55%,'] };
+
+    class Particle {
+        constructor(x, y) {
+            this.x = x; this.y = y;
+            this.vx = (Math.random()-0.5)*1.5; this.vy = (Math.random()-0.5)*1.5;
+            this.size = Math.random()*3+1; this.life = mCfg.life; this.maxLife = mCfg.life;
+            this.col = mCfg.colors[Math.floor(Math.random()*mCfg.colors.length)];
+        }
+        update() { this.x+=this.vx; this.y+=this.vy; this.vx*=0.99; this.vy*=0.99; this.life--; }
+        draw(c) {
+            const op = this.life/this.maxLife;
+            c.beginPath();
+            const g = c.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*2);
+            g.addColorStop(0, this.col+op+')'); g.addColorStop(1, this.col+'0)');
+            c.fillStyle=g; c.arc(this.x,this.y,this.size*2,0,Math.PI*2); c.fill();
+        }
+    }
+    class Ripple {
+        constructor(x,y) { this.x=x; this.y=y; this.size=0; this.alpha=0.4; }
+        update() { this.size+=1.5; this.alpha-=0.008; }
+        draw(c) {
+            c.strokeStyle = `rgba(255,255,255,${this.alpha*0.3})`; c.lineWidth=1;
+            c.beginPath(); c.arc(this.x,this.y,this.size,0,Math.PI*2); c.stroke();
+        }
+    }
+
+    function spawnPond(x,y) {
+        for(let i=0; i<2; i++) particles.push(new Particle(x,y));
+        if(Math.random()>0.85) ripples.push(new Ripple(x,y));
+    }
+    
+    // Inputs for Pond
+    mCanvas.addEventListener('pointerdown', e => {
+        const p = getPos(e, mCanvas); spawnPond(p.x, p.y);
+    });
+    mCanvas.addEventListener('pointermove', e => {
+        // Only spawn if mouse is down or it's a touch move
+        if(e.pressure > 0 || e.pointerType === 'touch') {
+            const p = getPos(e, mCanvas); spawnPond(p.x, p.y);
+        }
+    });
+
+    function startDream() {
+        if(!mReq) animateDream();
+        // Reset overlay text animation
+        const t = document.getElementById('dreamText');
+        t.style.animation = 'none';
+        t.offsetHeight; /* trigger reflow */
+        t.style.animation = 'fadeOutText 6s forwards 2s';
+    }
+    function stopDream() { cancelAnimationFrame(mReq); mReq = null; }
+
+    function animateDream() {
+        // Draw Bg with trails
+        mCtx.fillStyle = `rgba(5,5,8,${mCfg.bgAlpha})`;
+        mCtx.fillRect(0,0,mCanvas.width, mCanvas.height);
+        
+        // Draw Breathing Guide (Center Pulse)
+        mTime++;
+        const speed = 0.025;
+        const breath = (Math.sin(mTime*speed)+1)/2;
+        const cx = mCanvas.width/2, cy = mCanvas.height/2;
+        
+        // Outer Glow
+        mCtx.beginPath(); mCtx.arc(cx,cy, 50+(breath*50), 0, Math.PI*2);
+        mCtx.fillStyle=`rgba(120,160,255,${0.03+(breath*0.08)})`; mCtx.fill();
+        // Inner Core
+        mCtx.beginPath(); mCtx.arc(cx,cy, (50+(breath*50))*0.4, 0, Math.PI*2);
+        mCtx.fillStyle=`rgba(180,200,255,${0.08+(breath*0.08)})`; mCtx.fill();
+
+        // Particles
+        for(let i=particles.length-1; i>=0; i--) {
+            particles[i].update(); particles[i].draw(mCtx);
+            if(particles[i].life<=0) particles.splice(i,1);
+        }
+        // Ripples
+        for(let i=ripples.length-1; i>=0; i--) {
+            ripples[i].update(); ripples[i].draw(mCtx);
+            if(ripples[i].alpha<=0) ripples.splice(i,1);
+        }
+        // Ambient
+        if(Math.random()<0.03) {
+            let p = new Particle(Math.random()*mCanvas.width, Math.random()*mCanvas.height);
+            p.vx*=0.1; p.vy*=0.1; p.life=400; particles.push(p);
+        }
+
+        mReq = requestAnimationFrame(animateDream);
     }
 </script>
 </body>
