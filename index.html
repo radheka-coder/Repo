@@ -102,7 +102,7 @@
         }
         .blob-wrapper {
             width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; transition: 0.3s;
+            margin-bottom: 10px; transition: 0.3s; position: relative;
         }
         #theBlob {
             width: 100px; height: 100px; background: var(--neon-pink);
@@ -117,6 +117,16 @@
         }
         #theBlob::before { left: 30%; } #theBlob::after { right: 30%; }
         @keyframes blink { 0%, 96%, 100% { transform: scaleY(1); } 98% { transform: scaleY(0.1); } }
+        
+        /* Hat / Item Overlay */
+        #blobHat {
+            position: absolute; top: -35px; font-size: 3rem; pointer-events: none;
+            transition: 0.3s; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+        }
+        #blobItem {
+            position: absolute; bottom: -5px; right: -10px; font-size: 2rem;
+            transition: 0.3s;
+        }
 
         .speech-bubble {
             background: white; color: #333; padding: 15px; border-radius: 15px;
@@ -129,36 +139,57 @@
             border-width: 10px 10px 0; border-style: solid; border-color: white transparent transparent;
         }
         
-        .blob-controls { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .control-btn {
-            background: rgba(255,255,255,0.1); border: none; padding: 10px;
-            color: white; border-radius: 10px; font-size: 0.8rem; cursor: pointer;
+        .blob-controls { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
+        .gift-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px; border-radius: 12px; font-size: 1.2rem; cursor: pointer;
+            transition: 0.2s;
         }
+        .gift-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
 
-        /* --- BREATHING --- */
+        /* --- BREATHING (2 Circles + Posture) --- */
         .breathe-container {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 300px; position: relative;
         }
+        /* Outer Glow Circle */
+        .lung-outer {
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background: rgba(129, 140, 248, 0.2);
+            position: absolute; z-index: 1;
+            transition: transform 0.5s ease-in-out;
+            box-shadow: 0 0 60px rgba(129, 140, 248, 0.3);
+        }
+        /* Inner Solid Circle */
         .lung {
             width: 160px; height: 160px;
             background: conic-gradient(from 0deg, #818cf8, #38bdf8, #818cf8);
             border-radius: 50%;
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
             display: flex; align-items: center; justify-content: center;
             font-size: 1.2rem; color: white; text-align: center;
-            transform: scale(1);
             position: absolute; z-index: 2;
+            transition: transform 0.5s ease-in-out;
         }
-        .lung-guide { margin-top: 240px; font-size: 1.1rem; color: var(--neon-blue); min-height: 1.5rem;}
-        .breath-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px;
-        }
+        .lung-guide { margin-top: 240px; font-size: 1.1rem; color: var(--neon-blue); min-height: 1.5rem; text-align: center; }
+        
+        .breath-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
         .breath-btn {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
             color: rgba(255,255,255,0.8); padding: 8px; border-radius: 12px; font-size: 0.8rem;
         }
         .breath-btn.selected { background: var(--accent); border-color: var(--accent); color: white; font-weight: bold; }
+
+        .posture-toggle {
+            text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.5); 
+            text-decoration: underline; cursor: pointer; margin-top: 15px;
+        }
+        .posture-info {
+            display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;
+            margin-top: 10px; font-size: 0.85rem; line-height: 1.4; text-align: left;
+            border-left: 3px solid var(--accent);
+        }
 
         /* --- TRAVEL --- */
         #horizonCanvas { background: #000; border-radius: 20px; display: block; margin: 0 auto; border: 2px solid #333; }
@@ -207,15 +238,21 @@
 
     <section id="friend">
         <div class="blob-container">
-            <div class="speech-bubble" id="blobText">Hi! I'm here to listen.</div>
+            <div class="speech-bubble" id="blobText">Hi! I love gifts!</div>
             <div class="blob-wrapper">
+                <div id="blobHat"></div>
                 <div id="theBlob"></div>
+                <div id="blobItem"></div>
             </div>
             
+            <p style="font-size:0.8rem; opacity:0.6; margin-bottom:5px;">Give a gift:</p>
             <div class="blob-controls">
-                <button class="control-btn" onclick="customizeBlob('color')">Change Color</button>
-                <button class="control-btn" onclick="customizeBlob('shape')">Change Shape</button>
-                <button class="control-btn" style="grid-column: span 2; background: rgba(255,255,255,0.2)" onclick="blobTalk()">Ask for support</button>
+                <button class="gift-btn" onclick="giveGift('coffee')">☕</button>
+                <button class="gift-btn" onclick="giveGift('flower')">🌸</button>
+                <button class="gift-btn" onclick="giveGift('hat1')">🎩</button>
+                <button class="gift-btn" onclick="giveGift('hat2')">🎀</button>
+                <button class="gift-btn" onclick="giveGift('hat3')">🧢</button>
+                <button class="gift-btn" onclick="customizeBlob('color')" style="font-size:0.8rem; background:rgba(255,255,255,0.05)">Color</button>
             </div>
         </div>
     </section>
@@ -230,10 +267,22 @@
         </div>
 
         <div class="breathe-container">
+            <div class="lung-outer" id="lungOuter"></div>
             <div class="lung" id="lungCircle">Tap<br>Start</div>
             <div class="lung-guide" id="lungText">Select a mode</div>
         </div>
-        <p class="desc" style="font-size:0.7rem; margin-top:20px; opacity:0.5">Wellness aid only.</p>
+
+        <div class="posture-toggle" onclick="togglePosture()">research: correct posture guide ▾</div>
+        <div class="posture-info" id="postureInfo">
+            <strong>1. The Base</strong>
+            Sit with "sit bones" pressed down. Feet flat or cross-legged with hips higher than knees.
+            <br><br>
+            <strong>2. The Spine</strong>
+            Imagine a string pulling your head to the ceiling. A straight spine helps the vagus nerve.
+            <br><br>
+            <strong>3. The Chin</strong>
+            Tuck your chin slightly (Jalandhara Bandha) to lengthen the neck.
+        </div>
     </section>
 
     <section id="travel">
@@ -242,7 +291,7 @@
         <div class="travel-tools">
             <p style="font-size: 0.8rem; color: var(--neon-green)">Focus on the green dot.</p>
             <div class="focus-dot" id="focusDot" style="display:block;"></div>
-            <button class="control-btn" style="margin-top:10px; width:100%" onclick="requestSensors()">Enable Sensors (iOS)</button>
+            <button class="gift-btn" style="margin-top:10px; width:100%; font-size:0.9rem" onclick="requestSensors()">Enable Sensors (iOS)</button>
         </div>
     </section>
 </main>
@@ -272,209 +321,140 @@
         const targetBtn = btns.find(b => b.getAttribute('onclick').includes(id));
         if(targetBtn) targetBtn.classList.add('active');
 
-        // Force stop breathing when leaving tab to fix overlap
         if(id !== 'breath') forceStopBreathing(); 
-        
         if(id === 'travel') startHorizon(); else stopHorizon();
     }
 
-    /* --- 1. DRAWING (PERSISTENT) --- */
+    /* --- 1. DRAWING --- */
     const dCanvas = document.getElementById('drawCanvas');
     const dCtx = dCanvas.getContext('2d');
     let dColor = '#38bdf8';
     let dDrawing = false;
-
-    // Canvas Setup
     dCtx.lineCap = 'round'; dCtx.lineJoin = 'round'; dCtx.lineWidth = 6;
     dCtx.shadowBlur = 10; dCtx.shadowColor = dColor;
 
     function setColor(c, el) {
-        dColor = c;
-        dCtx.shadowColor = c;
+        dColor = c; dCtx.shadowColor = c;
         document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
         el.classList.add('active');
     }
-
-    function clearCanvas() {
-        dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
-    }
-
+    function clearCanvas() { dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height); }
     function getPos(e, c) {
         const rect = c.getBoundingClientRect();
         const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
         const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
         return {x, y};
     }
-
-    dCanvas.addEventListener('pointerdown', (e) => {
-        dDrawing = true;
-        const p = getPos(e, dCanvas);
-        dCtx.beginPath(); dCtx.moveTo(p.x, p.y);
-    });
-    dCanvas.addEventListener('pointermove', (e) => {
-        if(!dDrawing) return;
-        const p = getPos(e, dCanvas);
-        dCtx.lineTo(p.x, p.y);
-        dCtx.strokeStyle = dColor;
-        dCtx.stroke();
-    });
+    dCanvas.addEventListener('pointerdown', (e) => { dDrawing = true; dCtx.beginPath(); dCtx.moveTo(getPos(e, dCanvas).x, getPos(e, dCanvas).y); });
+    dCanvas.addEventListener('pointermove', (e) => { if(dDrawing) { dCtx.lineTo(getPos(e, dCanvas).x, getPos(e, dCanvas).y); dCtx.strokeStyle = dColor; dCtx.stroke(); }});
     dCanvas.addEventListener('pointerup', () => dDrawing = false);
 
-
-    /* --- 2. BASKETBALL FLING --- */
+    /* --- 2. BASKETBALL GAME --- */
     const gCanvas = document.getElementById('gameCanvas');
     const gCtx = gCanvas.getContext('2d');
-    let balls = [];
-    let score = 0;
-    
-    // Create Hoop
+    let balls = [], score = 0;
     const hoop = { x: 250, y: 150, r: 25 }; 
-
-    // Create 4 Glowing Orbs
-    for(let i=0; i<4; i++) {
-        balls.push({
-            x: Math.random()*100 + 50, y: 300,
-            vx: 0, vy: 0,
-            r: 12, hue: Math.random()*360
-        });
-    }
-
-    let draggedBall = null;
+    for(let i=0; i<4; i++) balls.push({ x: Math.random()*100+50, y: 300, vx: 0, vy: 0, r: 12, hue: Math.random()*360 });
+    let draggedBall = null, draggedPos = null;
 
     function gameLoop() {
         gCtx.clearRect(0,0,gCanvas.width, gCanvas.height);
-        
         // Draw Hoop
-        gCtx.beginPath();
-        gCtx.arc(hoop.x, hoop.y, hoop.r, 0, Math.PI*2);
-        gCtx.strokeStyle = 'rgba(255,255,255,0.3)';
-        gCtx.lineWidth = 4;
-        gCtx.stroke();
-        
-        // Hoop "Net" glow
-        gCtx.shadowBlur = 20;
-        gCtx.shadowColor = '#34d399';
-        gCtx.beginPath();
-        gCtx.moveTo(hoop.x - hoop.r, hoop.y);
-        gCtx.lineTo(hoop.x + hoop.r, hoop.y);
-        gCtx.stroke();
-        gCtx.shadowBlur = 0; // Reset for balls to have their own glow
+        gCtx.beginPath(); gCtx.arc(hoop.x, hoop.y, hoop.r, 0, Math.PI*2);
+        gCtx.strokeStyle = 'rgba(255,255,255,0.3)'; gCtx.lineWidth = 4; gCtx.stroke();
+        gCtx.shadowBlur = 20; gCtx.shadowColor = '#34d399';
+        gCtx.beginPath(); gCtx.moveTo(hoop.x - hoop.r, hoop.y); gCtx.lineTo(hoop.x + hoop.r, hoop.y); gCtx.stroke(); gCtx.shadowBlur = 0;
 
         balls.forEach(b => {
             if(b !== draggedBall) {
-                b.vy += 0.4; // Gravity
-                b.x += b.vx; b.y += b.vy;
-                b.vx *= 0.99; b.vy *= 0.99; // Air resistance
-
-                // Bounce walls
+                b.vy += 0.4; b.x += b.vx; b.y += b.vy; b.vx *= 0.99; b.vy *= 0.99;
                 if(b.y + b.r > 420) { b.y = 420 - b.r; b.vy *= -0.7; }
                 if(b.y - b.r < 0) { b.y = b.r; b.vy *= -0.7; }
                 if(b.x + b.r > 340) { b.x = 340 - b.r; b.vx *= -0.7; }
                 if(b.x - b.r < 0) { b.x = b.r; b.vx *= -0.7; }
-
-                // Scoring Logic (Simple: if ball falls into hoop area)
                 let dist = Math.hypot(b.x - hoop.x, b.y - hoop.y);
                 if(dist < hoop.r && b.vy > 0 && b.y < hoop.y + 10 && b.y > hoop.y - 10) {
-                    // Score!
-                    score++;
-                    document.getElementById('scoreVal').innerText = score;
-                    // Reset ball
-                    b.x = 50 + Math.random()*100;
-                    b.y = 350;
-                    b.vx = 0; b.vy = -5; // Pop it up slightly
-                    vibrate([50,50]);
+                    score++; document.getElementById('scoreVal').innerText = score;
+                    b.x = 50 + Math.random()*100; b.y = 350; b.vx = 0; b.vy = -5; vibrate([50,50]);
                 }
             }
-
-            // Draw Glowing Orb
-            gCtx.beginPath();
-            gCtx.shadowBlur = 25; // HIGH GLOW
-            gCtx.shadowColor = `hsl(${b.hue}, 100%, 70%)`;
-            gCtx.fillStyle = `hsl(${b.hue}, 100%, 85%)`;
-            gCtx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-            gCtx.fill();
-            gCtx.shadowBlur = 0;
+            gCtx.beginPath(); gCtx.shadowBlur = 25; gCtx.shadowColor = `hsl(${b.hue}, 100%, 70%)`;
+            gCtx.fillStyle = `hsl(${b.hue}, 100%, 85%)`; gCtx.arc(b.x, b.y, b.r, 0, Math.PI*2); gCtx.fill(); gCtx.shadowBlur = 0;
         });
 
-        // Draw drag line
         if(draggedBall && draggedPos) {
-            gCtx.beginPath();
-            gCtx.moveTo(draggedBall.x, draggedBall.y);
-            gCtx.lineTo(draggedPos.x, draggedPos.y);
-            gCtx.strokeStyle = "rgba(255,255,255,0.4)";
-            gCtx.lineWidth = 2;
-            gCtx.stroke();
+            gCtx.beginPath(); gCtx.moveTo(draggedBall.x, draggedBall.y); gCtx.lineTo(draggedPos.x, draggedPos.y);
+            gCtx.strokeStyle = "rgba(255,255,255,0.4)"; gCtx.lineWidth = 2; gCtx.stroke();
         }
-
         requestAnimationFrame(gameLoop);
     }
     gameLoop();
 
-    let draggedPos = null;
     gCanvas.addEventListener('pointerdown', (e) => {
-        const p = getPos(e, gCanvas);
-        draggedPos = p;
-        balls.forEach(b => {
-            if(Math.hypot(p.x-b.x, p.y-b.y) < b.r*3) draggedBall = b;
-        });
+        const p = getPos(e, gCanvas); draggedPos = p;
+        balls.forEach(b => { if(Math.hypot(p.x-b.x, p.y-b.y) < b.r*3) draggedBall = b; });
     });
-    gCanvas.addEventListener('pointermove', (e) => {
-        if(draggedBall) draggedPos = getPos(e, gCanvas);
-    });
+    gCanvas.addEventListener('pointermove', (e) => { if(draggedBall) draggedPos = getPos(e, gCanvas); });
     gCanvas.addEventListener('pointerup', (e) => {
         if(draggedBall && draggedPos) {
-            const p = getPos(e, gCanvas);
-            // Fling physics
-            draggedBall.vx = (draggedBall.x - p.x) * 0.25;
-            draggedBall.vy = (draggedBall.y - p.y) * 0.25;
-        }
-        draggedBall = null; draggedPos = null;
+            const p = getPos(e, gCanvas); draggedBall.vx = (draggedBall.x - p.x) * 0.25; draggedBall.vy = (draggedBall.y - p.y) * 0.25;
+        } draggedBall = null; draggedPos = null;
     });
 
-
-    /* --- 3. BLOB FRIEND --- */
+    /* --- 3. BLOB FRIEND (GIFTS) --- */
     const blob = document.getElementById('theBlob');
+    const blobHat = document.getElementById('blobHat');
+    const blobItem = document.getElementById('blobItem');
     const bubble = document.getElementById('blobText');
-    const blobMsgs = [
-        "I'm listening.", "You matter.", "Big breath in...",
-        "I'm not going anywhere.", "We can sit here as long as you want."
-    ];
 
     function customizeBlob(type) {
         if(type === 'color') {
             const h = Math.floor(Math.random() * 360);
             blob.style.backgroundColor = `hsl(${h}, 70%, 60%)`;
-        } else if (type === 'shape') {
-            const r = () => Math.floor(Math.random() * 50) + 20;
-            blob.style.borderRadius = `${r()}% ${r()}% ${r()}% ${r()}%`;
         }
     }
 
-    function blobTalk() {
-        const txt = blobMsgs[Math.floor(Math.random() * blobMsgs.length)];
-        bubble.innerText = txt;
+    function giveGift(item) {
+        // Reset item
+        blobItem.innerText = "";
+        
+        if(item === 'coffee') {
+            blobItem.innerText = "☕";
+            bubble.innerText = "Mmm, warm coffee. Thank you!";
+        } else if(item === 'flower') {
+            blobItem.innerText = "🌸";
+            bubble.innerText = "It smells lovely!";
+        } else if(item.startsWith('hat')) {
+            if(item === 'hat1') blobHat.innerText = "🎩";
+            if(item === 'hat2') blobHat.innerText = "🎀";
+            if(item === 'hat3') blobHat.innerText = "🧢";
+            bubble.innerText = "Do I look stylish?";
+        }
+        
+        // Happy bounce
         blob.style.transform = "scale(1.2)";
         setTimeout(() => blob.style.transform = "scale(1)", 300);
-        vibrate(20);
+        vibrate(30);
     }
 
-
-    /* --- 4. BREATHING (FIXED RESTART) --- */
+    /* --- 4. BREATHING (FIXED TEXT & CIRCLES) --- */
     let bActive = false;
     let bMode = 'relax';
     const lung = document.getElementById('lungCircle');
+    const lungOuter = document.getElementById('lungOuter');
     const lungTxt = document.getElementById('lungText');
-    let bTimeouts = []; // Array to hold all timers for easy clearing
+    const postureInfo = document.getElementById('postureInfo');
+    let bTimeouts = [];
 
     lung.onclick = () => { if(bActive) forceStopBreathing(); else startBreathing(); };
+    function togglePosture() { postureInfo.style.display = postureInfo.style.display === 'block' ? 'none' : 'block'; }
 
     function setBreathMode(m, btn) {
-        forceStopBreathing(); // Crucial: Stop everything before switching
+        forceStopBreathing();
         bMode = m;
         document.querySelectorAll('.breath-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        
-        // Update helper text immediately
+        // Set help text
         if(m === 'ujjayi') lungTxt.innerText = "Ocean Breath (Throat)";
         else if(m === 'nadi') lungTxt.innerText = "Alt Nostril";
         else if(m === 'bhastrika') lungTxt.innerText = "Bellows (Fast)";
@@ -530,24 +510,31 @@
     function animateLung(text, scale, time, callback) {
         if(!bActive) return;
         lungTxt.innerText = text;
+        
+        // Inner Circle
         lung.style.transition = `transform ${time}ms ease-in-out`;
         lung.style.transform = `scale(${scale})`;
         
-        // Push timeout to array so we can clear it later
+        // Outer Circle (Delayed slightly for ripple effect)
+        lungOuter.style.transition = `transform ${time}ms ease-in-out`;
+        lungOuter.style.transform = `scale(${scale * 1.2})`;
+
         const id = setTimeout(callback, time);
         bTimeouts.push(id);
     }
 
     function forceStopBreathing() {
         bActive = false;
-        // Clear ALL pending timeouts immediately
         bTimeouts.forEach(id => clearTimeout(id));
         bTimeouts = [];
         
-        // Reset Visuals immediately
         lung.style.transition = "transform 0.3s"; 
         lung.style.transform = "scale(1)";
+        lungOuter.style.transition = "transform 0.3s";
+        lungOuter.style.transform = "scale(1)";
+        
         lungTxt.innerText = "Tap to Start";
+        lung.innerText = "Tap\nStart"; // Reset inner text
     }
 
 
@@ -558,9 +545,7 @@
 
     function requestSensors() {
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission()
-                .then(r => { if(r==='granted') startHorizon(); })
-                .catch(console.error);
+            DeviceOrientationEvent.requestPermission().then(r => { if(r==='granted') startHorizon(); });
         } else { startHorizon(); }
     }
 
@@ -568,34 +553,16 @@
         window.addEventListener('deviceorientation', (e) => { if(e.gamma) roll = e.gamma; });
         if(!hReq) drawHorizon();
     }
-    function stopHorizon() {
-        cancelAnimationFrame(hReq); hReq = null;
-    }
+    function stopHorizon() { cancelAnimationFrame(hReq); hReq = null; }
 
     function drawHorizon() {
         const w = 340, h = 300;
-        hCtx.clearRect(0,0,w,h);
-        hCtx.save();
-        hCtx.translate(w/2, h/2);
-        hCtx.rotate(-roll * Math.PI / 180);
-        
-        // Sky/Ground
+        hCtx.clearRect(0,0,w,h); hCtx.save(); hCtx.translate(w/2, h/2); hCtx.rotate(-roll * Math.PI / 180);
         hCtx.fillStyle = '#1e293b'; hCtx.fillRect(-w, -h, 2*w, h);
         hCtx.fillStyle = '#0f172a'; hCtx.fillRect(-w, 0, 2*w, h);
-        
-        // Line
-        hCtx.fillStyle = '#34d399';
-        hCtx.shadowBlur = 10; hCtx.shadowColor = '#34d399';
-        hCtx.fillRect(-w, -2, 2*w, 4);
-        hCtx.restore();
-
-        // Crosshair
-        hCtx.shadowBlur = 0;
-        hCtx.strokeStyle = 'white'; hCtx.lineWidth=2;
-        hCtx.beginPath();
-        hCtx.arc(w/2, h/2, 5, 0, Math.PI*2);
-        hCtx.stroke();
-
+        hCtx.fillStyle = '#34d399'; hCtx.shadowBlur = 10; hCtx.shadowColor = '#34d399';
+        hCtx.fillRect(-w, -2, 2*w, 4); hCtx.restore();
+        hCtx.shadowBlur = 0; hCtx.strokeStyle = 'white'; hCtx.lineWidth=2; hCtx.beginPath(); hCtx.arc(w/2, h/2, 5, 0, Math.PI*2); hCtx.stroke();
         hReq = requestAnimationFrame(drawHorizon);
     }
 </script>
