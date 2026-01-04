@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Nest | Deep Space</title>
+    <title>The Nest | Safe Space</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Twilight / Dark Theme for better contrast */
             --bg-top: #0f172a;
             --bg-bottom: #1e1b4b;
             --glass: rgba(30, 41, 59, 0.7);
@@ -15,6 +14,7 @@
             --text: #e2e8f0;
             --accent: #818cf8;
             --neon-blue: #38bdf8;
+            --neon-green: #34d399; /* For Car Mode */
             --neon-pink: #f472b6;
         }
 
@@ -32,8 +32,8 @@
 
         header {
             text-align: center;
-            padding: 20px 20px 5px;
-            font-size: 1.5rem;
+            padding: 15px 20px 5px;
+            font-size: 1.4rem;
             font-weight: 300;
             letter-spacing: 4px;
             text-transform: lowercase;
@@ -45,18 +45,19 @@
             display: flex;
             justify-content: flex-start;
             gap: 10px;
-            padding: 15px 20px;
+            padding: 10px 20px;
             overflow-x: auto;
             scrollbar-width: none;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         nav::-webkit-scrollbar { display: none; }
 
         nav button {
             background: rgba(255,255,255,0.05);
             border: 1px solid var(--glass-border);
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: 0.3s ease;
             color: rgba(255,255,255,0.6);
@@ -89,11 +90,11 @@
         section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .desc { text-align: center; font-size: 0.85rem; opacity: 0.5; margin-bottom: 20px; margin-top: 0; }
+        .desc { text-align: center; font-size: 0.85rem; opacity: 0.5; margin-bottom: 15px; margin-top: 5px; }
 
-        /* --- MIST (High Contrast) --- */
+        /* --- MIST (Silent) --- */
         #mistCanvas {
-            background: #111827; /* Dark background */
+            background: #111827;
             border-radius: 20px;
             display: block;
             margin: 0 auto;
@@ -102,7 +103,7 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* --- POPS (High Contrast) --- */
+        /* --- POPS --- */
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .bubble {
             aspect-ratio: 1;
@@ -112,16 +113,11 @@
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
             cursor: pointer;
             transition: 0.1s;
-            position: relative;
         }
-        .bubble:active { transform: scale(0.9); background: var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue); }
-        .bubble.popped { 
-            transform: scale(0.5); 
-            opacity: 0; 
-            transition: transform 0.1s, opacity 0.2s;
-        }
+        .bubble:active { transform: scale(0.9); background: var(--neon-blue); }
+        .bubble.popped { transform: scale(0.5); opacity: 0; transition: transform 0.1s, opacity 0.2s; }
 
-        /* --- PHYSICS (Satisfying) --- */
+        /* --- PHYSICS (Fling) --- */
         #gravityCanvas {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 20px;
@@ -131,14 +127,10 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* --- BREATHING --- */
+        /* --- BREATHING (Pranayama) --- */
         .breathe-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            position: relative;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 280px; position: relative; margin-top: 10px;
         }
         .lung {
             width: 140px; height: 140px;
@@ -149,58 +141,46 @@
             font-size: 1.1rem; color: white;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
             transition: all 4s ease-in-out;
-            position: absolute;
-            z-index: 2;
-        }
-        .lung::after {
-            content: ''; position: absolute; top:-10px; left:-10px; right:-10px; bottom:-10px;
-            border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); z-index: 1;
+            z-index: 2; position: absolute;
         }
         .lung-guide {
-            margin-top: 220px; font-size: 1rem; font-weight: 500; color: var(--accent); letter-spacing: 1px;
+            margin-top: 220px; font-size: 1.1rem; font-weight: 500; color: var(--accent); letter-spacing: 1px;
         }
-
-        /* --- CLICKS & SLIDERS --- */
-        .slider-bank {
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            border: 1px solid var(--glass-border);
-        }
-        .slider-row {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 15px;
-        }
-        .slider-row:last-child { margin-bottom: 0; }
         
-        /* Custom styled range input */
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent;
+        /* Breath Controls */
+        .breath-options {
+            display: flex; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 20px;
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 24px; width: 24px;
-            border-radius: 50%; background: var(--neon-pink);
-            cursor: pointer; margin-top: -10px;
-            box-shadow: 0 0 10px var(--neon-pink);
+        .breath-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.8rem;
         }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px; cursor: pointer;
-            background: rgba(255,255,255,0.1); border-radius: 2px;
-        }
+        .breath-btn.selected { background: var(--accent); border-color: var(--accent); font-weight: bold; }
 
-        .keyboard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-        .key {
-            width: 36px; height: 36px;
-            background: #334155;
-            border-radius: 6px;
-            box-shadow: 0 4px 0 #1e293b;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; color: #94a3b8;
-            cursor: pointer;
-            transition: 0.05s;
-            border-top: 1px solid rgba(255,255,255,0.1);
+        .posture-toggle {
+            text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.5); 
+            text-decoration: underline; cursor: pointer; margin-top: 10px;
         }
-        .key:active { transform: translateY(4px); box-shadow: 0 0 0 #1e293b; background: var(--accent); color: white; }
+        .posture-info {
+            display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;
+            margin-top: 10px; font-size: 0.85rem; line-height: 1.4; text-align: left;
+            border-left: 3px solid var(--accent);
+        }
+        .posture-info strong { color: var(--neon-blue); display: block; margin-bottom: 4px; }
+
+        /* --- CAR SICKNESS (Horizon) --- */
+        #horizonCanvas {
+            background: #000;
+            border-radius: 20px;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #333;
+        }
+        .sensor-btn {
+            display: block; margin: 20px auto; padding: 12px 24px;
+            background: var(--neon-green); color: #064e3b; border: none;
+            border-radius: 25px; font-weight: bold; font-size: 1rem;
+        }
 
         /* --- AUDIO --- */
         .noise-card {
@@ -208,10 +188,7 @@
             display: flex; justify-content: space-between; align-items: center;
             cursor: pointer; transition: 0.2s; border: 1px solid transparent;
         }
-        .noise-card:hover { background: rgba(255,255,255,0.1); }
         .noise-card.playing { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.1); }
-        .noise-card h3 { margin: 0; font-size: 0.95rem; font-weight: 500; }
-        .noise-card span { font-size: 0.75rem; opacity: 0.6; }
         .indicator { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
         .playing .indicator { background: var(--neon-blue); box-shadow: 0 0 8px var(--neon-blue); }
 
@@ -226,78 +203,72 @@
     <button onclick="showSection('pop')">pops</button>
     <button onclick="showSection('gravity')">fling</button>
     <button onclick="showSection('breath')">breathe</button>
-    <button onclick="showSection('click')">fidget</button>
+    <button onclick="showSection('car')">travel</button>
     <button onclick="showSection('audio')">noise</button>
 </nav>
 
 <main>
     <section id="mist" class="active">
-        <p class="desc">trace the light. it fades slowly.</p>
+        <p class="desc">trace the light. purely visual. no sound.</p>
         <canvas id="mistCanvas" width="340" height="420"></canvas>
     </section>
 
     <section id="pop">
-        <p class="desc">high contrast pops.</p>
+        <p class="desc">neon pops. tap to ground yourself.</p>
         <div class="grid" id="bubbleGrid"></div>
     </section>
 
     <section id="gravity">
-        <p class="desc">high bounce gravity. throw them.</p>
+        <p class="desc">fling the orbs. watch them bounce.</p>
         <canvas id="gravityCanvas" width="340" height="400"></canvas>
     </section>
 
     <section id="breath">
-        <p class="desc">4-7-8 rhythm</p>
+        <div class="breath-options">
+            <button class="breath-btn selected" onclick="setBreathMode('relax', this)">Relax (4-7-8)</button>
+            <button class="breath-btn" onclick="setBreathMode('box', this)">Focus (Box)</button>
+            <button class="breath-btn" onclick="setBreathMode('balance', this)">Balance (6-6)</button>
+        </div>
+
         <div class="breathe-container">
             <div class="lung" id="lungCircle">Breathe</div>
             <div class="lung-guide" id="lungText">Tap to Start</div>
         </div>
+
+        <div class="posture-toggle" onclick="togglePosture()">research: correct posture guide ▾</div>
+        <div class="posture-info" id="postureInfo">
+            <strong>1. The Base</strong>
+            Sit with "sit bones" pressed down. If in a chair, feet flat on the floor. If on a bed, cross-legged with hips higher than knees (use a pillow).
+            <br><br>
+            <strong>2. The Spine</strong>
+            Imagine a string pulling the crown of your head to the ceiling. A straight spine allows the diaphragm to move fully without compression.
+            <br><br>
+            <strong>3. The Chin</strong>
+            Tuck your chin slightly (Jalandhara Bandha). This lengthens the back of the neck and stimulates the vagus nerve to reduce nausea and anxiety.
+        </div>
     </section>
 
-    <section id="click">
-        <p class="desc">mechanical keys & smooth sliders</p>
+    <section id="car">
+        <p class="desc">artificial horizon for motion sickness.</p>
+        <p class="desc" style="font-size:0.75rem; color:var(--neon-green)">Keep the green line flat with the earth.</p>
         
-        <div class="slider-bank">
-            <div class="slider-row">
-                <input type="range" min="0" max="100" value="0" oninput="playTick(this.value)">
-            </div>
-            <div class="slider-row">
-                <input type="range" min="0" max="100" value="50" oninput="playTick(this.value)">
-            </div>
-            <div class="slider-row">
-                <input type="range" min="0" max="100" value="100" oninput="playTick(this.value)">
-            </div>
-        </div>
-
-        <div class="keyboard-grid" id="keyGrid"></div>
+        <canvas id="horizonCanvas" width="340" height="340"></canvas>
+        
+        <button class="sensor-btn" id="sensorBtn" onclick="requestSensors()">Enable Sensors (iOS)</button>
+        <p style="font-size: 0.7rem; text-align: center; opacity: 0.5;">If on iPhone, tap above. Android works automatically.</p>
     </section>
 
     <section id="audio">
-        <p class="desc">sound spectrum</p>
+        <p class="desc">calming frequencies</p>
         
         <div class="noise-card" id="greenBtn" onclick="toggleNoise('green')">
-            <div><h3>Green Noise</h3><span>Nature / Waterfall</span></div>
-            <div class="indicator"></div>
+            <div><h3>Green Noise</h3><span style="font-size:0.7rem; opacity:0.6">Nature / Waterfall</span></div><div class="indicator"></div>
         </div>
-
         <div class="noise-card" id="brownBtn" onclick="toggleNoise('brown')">
-            <div><h3>Brown Noise</h3><span>Deep / Rumble</span></div>
-            <div class="indicator"></div>
+            <div><h3>Brown Noise</h3><span style="font-size:0.7rem; opacity:0.6">Deep / Rumble</span></div><div class="indicator"></div>
         </div>
-
         <div class="noise-card" id="pinkBtn" onclick="toggleNoise('pink')">
-            <div><h3>Pink Noise</h3><span>Rain / Wind</span></div>
-            <div class="indicator"></div>
-        </div>
-
-        <div class="noise-card" id="whiteBtn" onclick="toggleNoise('white')">
-            <div><h3>White Noise</h3><span>Static / Blocking</span></div>
-            <div class="indicator"></div>
-        </div>
-
-        <div class="noise-card" id="violetBtn" onclick="toggleNoise('violet')">
-            <div><h3>Violet Noise</h3><span>High / Crisp</span></div>
-            <div class="indicator"></div>
+            <div><h3>Pink Noise</h3><span style="font-size:0.7rem; opacity:0.6">Rain / Wind</span></div><div class="indicator"></div>
         </div>
     </section>
 </main>
@@ -308,6 +279,12 @@
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
 
+    // Vibration Helper (Android only, ignored by iOS)
+    function vibrate(ms) {
+        if(navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    /* --- NAVIGATION --- */
     function showSection(id) {
         document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -318,23 +295,20 @@
         if(targetBtn) targetBtn.classList.add('active');
 
         if (id !== 'breath') stopBreathing();
+        if (id !== 'car') stopHorizon();
+        if (id === 'car') startHorizon();
     }
 
-    /* --- 1. MIST (HIGH VISIBILITY) --- */
+    /* --- 1. MIST (NO SOUND) --- */
     const mCanvas = document.getElementById('mistCanvas');
     const mCtx = mCanvas.getContext('2d');
     
-    mCtx.shadowBlur = 15;
-    mCtx.shadowColor = "#38bdf8"; // Neon blue glow
-    mCtx.lineJoin = 'round';
-    mCtx.lineCap = 'round';
-    mCtx.lineWidth = 30; 
-    
+    mCtx.shadowBlur = 15; mCtx.shadowColor = "#38bdf8"; 
+    mCtx.lineJoin = 'round'; mCtx.lineCap = 'round'; mCtx.lineWidth = 30; 
     let mDrawing = false;
 
     function mistLoop() {
         mCtx.globalCompositeOperation = 'source-over';
-        // Very subtle fade to keep trails visible longer
         mCtx.fillStyle = 'rgba(17, 24, 39, 0.02)'; 
         mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
         requestAnimationFrame(mistLoop);
@@ -351,79 +325,56 @@
     mCanvas.addEventListener('pointerdown', (e) => {
         mDrawing = true;
         const p = getPos(e, mCanvas);
-        mCtx.beginPath();
-        mCtx.moveTo(p.x, p.y);
+        mCtx.beginPath(); mCtx.moveTo(p.x, p.y);
     });
 
     mCanvas.addEventListener('pointermove', (e) => {
         if (!mDrawing) return;
         const p = getPos(e, mCanvas);
         mCtx.lineTo(p.x, p.y);
-        // Bright White stroke for max contrast
         mCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         mCtx.stroke();
     });
     mCanvas.addEventListener('pointerup', () => mDrawing = false);
 
-
-    /* --- 2. PHYSICS (SATISFYING) --- */
+    /* --- 2. PHYSICS (FLING) --- */
     const gCanvas = document.getElementById('gravityCanvas');
     const gCtx = gCanvas.getContext('2d');
     let balls = [];
 
-    // Create 8 glowing balls
     for(let i=0; i<8; i++) {
         balls.push({
-            x: Math.random() * gCanvas.width,
-            y: Math.random() * gCanvas.height,
-            vx: (Math.random() - 0.5) * 6,
-            vy: (Math.random() - 0.5) * 6,
-            r: 12 + Math.random() * 8,
-            hue: Math.random() * 360
+            x: Math.random() * gCanvas.width, y: Math.random() * gCanvas.height,
+            vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+            r: 12 + Math.random() * 8, hue: Math.random() * 360
         });
     }
 
-    let draggedBall = null;
-    let draggedPos = null;
+    let draggedBall = null; let draggedPos = null;
 
     function physicsLoop() {
         gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
-        
         balls.forEach(b => {
             if (b !== draggedBall) {
-                b.vy += 0.4; // Stronger Gravity
-                b.x += b.vx;
-                b.y += b.vy;
-
-                // Friction
-                b.vx *= 0.995;
-                b.vy *= 0.995;
-
-                // Bounce (Higher restitution = more satisfying)
+                b.vy += 0.4; b.x += b.vx; b.y += b.vy;
+                b.vx *= 0.995; b.vy *= 0.995;
                 if (b.y + b.r > gCanvas.height) { b.y = gCanvas.height - b.r; b.vy *= -0.85; }
                 if (b.y - b.r < 0) { b.y = b.r; b.vy *= -0.85; }
                 if (b.x + b.r > gCanvas.width) { b.x = gCanvas.width - b.r; b.vx *= -0.85; }
                 if (b.x - b.r < 0) { b.x = b.r; b.vx *= -0.85; }
             }
-
             gCtx.beginPath();
-            gCtx.shadowBlur = 15;
-            gCtx.shadowColor = `hsl(${b.hue}, 80%, 60%)`;
+            gCtx.shadowBlur = 15; gCtx.shadowColor = `hsl(${b.hue}, 80%, 60%)`;
             gCtx.fillStyle = `hsl(${b.hue}, 80%, 70%)`;
             gCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-            gCtx.fill();
-            gCtx.shadowBlur = 0; // Reset shadow for line
+            gCtx.fill(); gCtx.shadowBlur = 0;
         });
 
         if (draggedBall && draggedPos) {
-            gCtx.beginPath();
-            gCtx.moveTo(draggedBall.x, draggedBall.y);
+            gCtx.beginPath(); gCtx.moveTo(draggedBall.x, draggedBall.y);
             gCtx.lineTo(draggedPos.x, draggedPos.y);
-            gCtx.strokeStyle = "rgba(255,255,255,0.5)";
-            gCtx.lineWidth = 2;
-            gCtx.stroke();
+            gCtx.strokeStyle = "rgba(255,255,255,0.5)"; gCtx.lineWidth = 2; gCtx.stroke();
         }
-
         requestAnimationFrame(physicsLoop);
     }
     physicsLoop();
@@ -432,26 +383,21 @@
         const p = getPos(e, gCanvas);
         draggedPos = p;
         balls.forEach(b => {
-            const dist = Math.sqrt((p.x - b.x)**2 + (p.y - b.y)**2);
-            if (dist < b.r * 3) draggedBall = b; // Generous grab radius
+            if (Math.sqrt((p.x - b.x)**2 + (p.y - b.y)**2) < b.r * 3) {
+                draggedBall = b; vibrate(10);
+            }
         });
     });
 
-    gCanvas.addEventListener('pointermove', (e) => {
-        if (draggedBall) draggedPos = getPos(e, gCanvas);
-    });
-
+    gCanvas.addEventListener('pointermove', (e) => { if (draggedBall) draggedPos = getPos(e, gCanvas); });
     gCanvas.addEventListener('pointerup', (e) => {
         if (draggedBall && draggedPos) {
             const p = getPos(e, gCanvas);
-            // High velocity multiplier for satisfying fling
-            draggedBall.vx = (draggedBall.x - p.x) * 0.25;
-            draggedBall.vy = (draggedBall.y - p.y) * 0.25;
+            draggedBall.vx = (draggedBall.x - p.x) * 0.25; draggedBall.vy = (draggedBall.y - p.y) * 0.25;
+            vibrate(15);
         }
-        draggedBall = null;
-        draggedPos = null;
+        draggedBall = null; draggedPos = null;
     });
-
 
     /* --- 3. BUBBLES --- */
     const grid = document.getElementById('bubbleGrid');
@@ -459,22 +405,15 @@
         const b = document.createElement('div');
         b.className = 'bubble';
         b.onclick = () => {
-            initAudio();
-            playPop(300 + Math.random() * 400); // Higher pitch for neon feel
+            initAudio(); playPop(300 + Math.random() * 400); vibrate(30);
             b.classList.add('popped');
-            setTimeout(() => {
-                b.classList.remove('popped');
-                b.style.transform = "scale(1)";
-                b.style.opacity = "1";
-            }, 1000); 
+            setTimeout(() => { b.classList.remove('popped'); }, 1000); 
         };
         grid.appendChild(b);
     }
 
     function playPop(freq) {
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.type = 'sine';
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
         o.frequency.setValueAtTime(freq, audioCtx.currentTime);
         o.frequency.exponentialRampToValueAtTime(freq * 0.01, audioCtx.currentTime + 0.15);
         g.gain.setValueAtTime(0.1, audioCtx.currentTime);
@@ -483,177 +422,214 @@
         o.start(); o.stop(audioCtx.currentTime + 0.15);
     }
 
-
-    /* --- 4. BREATHING --- */
+    /* --- 4. BREATHING (MODES) --- */
     const lung = document.getElementById('lungCircle');
     const lungText = document.getElementById('lungText');
+    const postureInfo = document.getElementById('postureInfo');
     let breathingActive = false;
+    let breathMode = 'relax'; // relax, box, balance
+    let breathTimeout;
 
     lung.onclick = toggleBreathing;
     lungText.onclick = toggleBreathing;
 
-    function toggleBreathing() {
-        if(breathingActive) stopBreathing(); else startBreathing();
+    function togglePosture() {
+        postureInfo.style.display = postureInfo.style.display === 'block' ? 'none' : 'block';
     }
+
+    function setBreathMode(mode, btn) {
+        stopBreathing();
+        breathMode = mode;
+        document.querySelectorAll('.breath-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    }
+
+    function toggleBreathing() { if(breathingActive) stopBreathing(); else startBreathing(); }
 
     function startBreathing() {
         breathingActive = true;
-        lungText.innerText = "Inhale (4)";
-        lung.style.transition = "transform 4s ease-in-out";
+        vibrate(50);
+        runBreathCycle();
+    }
+
+    function runBreathCycle() {
+        if(!breathingActive) return;
+
+        // Configurations
+        let inhaleT, hold1T, exhaleT, hold2T;
+        
+        if (breathMode === 'relax') { // 4-7-8
+            inhaleT = 4000; hold1T = 7000; exhaleT = 8000; hold2T = 0;
+        } else if (breathMode === 'box') { // 4-4-4-4
+            inhaleT = 4000; hold1T = 4000; exhaleT = 4000; hold2T = 4000;
+        } else if (breathMode === 'balance') { // 6-6 (Coherent)
+            inhaleT = 6000; hold1T = 0; exhaleT = 6000; hold2T = 0;
+        }
+
+        // INHALE
+        lungText.innerText = "Inhale";
+        lung.style.transition = `transform ${inhaleT}ms ease-in-out`;
         lung.style.transform = "scale(1.5)";
         
-        let phase = 0;
-        const runCycle = () => {
+        breathTimeout = setTimeout(() => {
             if(!breathingActive) return;
-            setTimeout(() => {
+            
+            // HOLD 1
+            if(hold1T > 0) {
+                lungText.innerText = "Hold";
+                setTimeout(doExhale, hold1T);
+            } else {
+                doExhale();
+            }
+
+        }, inhaleT);
+
+        function doExhale() {
+            if(!breathingActive) return;
+            lungText.innerText = "Exhale";
+            lung.style.transition = `transform ${exhaleT}ms ease-in-out`;
+            lung.style.transform = "scale(1)";
+            
+            breathTimeout = setTimeout(() => {
                 if(!breathingActive) return;
-                lungText.innerText = "Hold (7)";
-                setTimeout(() => {
-                    if(!breathingActive) return;
-                    lungText.innerText = "Exhale (8)";
-                    lung.style.transition = "transform 8s ease-in-out";
-                    lung.style.transform = "scale(1)";
-                    setTimeout(() => {
-                        if(!breathingActive) return;
-                        lungText.innerText = "Inhale (4)";
-                        lung.style.transition = "transform 4s ease-in-out";
-                        lung.style.transform = "scale(1.5)";
-                        runCycle();
-                    }, 8000);
-                }, 7000);
-            }, 4000);
-        };
-        runCycle();
+
+                // HOLD 2 (Box breath only)
+                if(hold2T > 0) {
+                    lungText.innerText = "Hold";
+                    setTimeout(runBreathCycle, hold2T);
+                } else {
+                    runBreathCycle();
+                }
+            }, exhaleT);
+        }
     }
 
     function stopBreathing() {
         breathingActive = false;
+        clearTimeout(breathTimeout);
         lungText.innerText = "Tap to Start";
         lung.style.transform = "scale(1)";
     }
 
+    /* --- 5. CAR SICKNESS (HORIZON) --- */
+    const hCanvas = document.getElementById('horizonCanvas');
+    const hCtx = hCanvas.getContext('2d');
+    let hReq;
+    let currentRoll = 0;
 
-    /* --- 5. KEYS & SLIDERS --- */
-    const keyGrid = document.getElementById('keyGrid');
-    const chars = "QWERTYUIOPASDFGHJKLZXCVBNM";
-    chars.split('').forEach(char => {
-        const k = document.createElement('div');
-        k.className = 'key';
-        k.innerText = char;
-        k.onmousedown = (e) => { e.preventDefault(); clickSound(); };
-        keyGrid.appendChild(k);
-    });
-
-    let lastTick = 0;
-    function playTick(val) {
-        initAudio();
-        // Limit tick rate
-        const now = Date.now();
-        if (now - lastTick < 30) return;
-        lastTick = now;
-
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.frequency.setValueAtTime(800, audioCtx.currentTime);
-        o.type = 'triangle';
-        g.gain.setValueAtTime(0.02, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + 0.03);
+    function requestSensors() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response === 'granted') {
+                        document.getElementById('sensorBtn').style.display = 'none';
+                        startHorizon();
+                    } else {
+                        alert('Permission needed for horizon');
+                    }
+                })
+                .catch(console.error);
+        } else {
+            // Android/Non-iOS logic
+            document.getElementById('sensorBtn').style.display = 'none';
+            startHorizon();
+        }
     }
 
-    function clickSound() {
-        initAudio();
-        const bufferSize = audioCtx.sampleRate * 0.05;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = buffer;
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 1000;
-        const gain = audioCtx.createGain();
-        
-        noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-        noise.start();
+    function handleOrientation(e) {
+        // Gamma is left/right tilt (roll)
+        if(e.gamma !== null) currentRoll = e.gamma;
     }
 
+    function drawHorizon() {
+        const w = hCanvas.width;
+        const h = hCanvas.height;
+        hCtx.clearRect(0,0,w,h);
 
-    /* --- 6. AUDIO (MORE COLORS) --- */
+        hCtx.save();
+        hCtx.translate(w/2, h/2);
+        // Rotate opposite to device to keep line flat
+        hCtx.rotate(-currentRoll * Math.PI / 180);
+
+        // Draw Sky/Ground split
+        hCtx.fillStyle = '#333';
+        hCtx.fillRect(-w, -h, w*2, h); // Top half
+        hCtx.fillStyle = '#111';
+        hCtx.fillRect(-w, 0, w*2, h); // Bottom half
+
+        // The Horizon Line
+        hCtx.shadowBlur = 20;
+        hCtx.shadowColor = '#34d399';
+        hCtx.fillStyle = '#34d399';
+        hCtx.fillRect(-w, -2, w*2, 4);
+
+        hCtx.restore();
+
+        // Crosshair (Fixed to phone)
+        hCtx.shadowBlur = 0;
+        hCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+        hCtx.lineWidth = 2;
+        hCtx.beginPath();
+        hCtx.moveTo(w/2, h/2 - 20); hCtx.lineTo(w/2, h/2 + 20);
+        hCtx.moveTo(w/2 - 20, h/2); hCtx.lineTo(w/2 + 20, h/2);
+        hCtx.stroke();
+
+        hReq = requestAnimationFrame(drawHorizon);
+    }
+
+    function startHorizon() {
+        window.addEventListener('deviceorientation', handleOrientation);
+        if(!hReq) drawHorizon();
+    }
+    function stopHorizon() {
+        window.removeEventListener('deviceorientation', handleOrientation);
+        cancelAnimationFrame(hReq);
+        hReq = null;
+    }
+
+    /* --- 6. AUDIO GEN --- */
     let noiseNode = null;
     let currentNoiseType = null;
 
     function toggleNoise(type) {
         initAudio();
         if (noiseNode && currentNoiseType === type) { stopNoise(); return; }
-        stopNoise();
-        currentNoiseType = type;
+        stopNoise(); currentNoiseType = type;
         
         const bufferSize = 2 * audioCtx.sampleRate;
         const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = buffer.getChannelData(0);
 
-        // Generate White Noise Base
-        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+        // Brown noise generation logic
+        let lastOut = 0.0;
+        for (let i = 0; i < bufferSize; i++) {
+            let white = Math.random() * 2 - 1;
+            if (type === 'brown') {
+                output[i] = (lastOut + (0.02 * white)) / 1.002 * 3.5;
+                lastOut = output[i];
+                output[i] *= 3.5; 
+            } else {
+                output[i] = white; // White base for others
+            }
+        }
 
         noiseNode = audioCtx.createBufferSource();
         noiseNode.buffer = buffer;
         noiseNode.loop = true;
 
-        // Filters based on Color
-        let finalNode = noiseNode;
-
-        if (type === 'pink') {
-            // Approximation for Pink handled in generation usually, 
-            // but for simplicity we will use a lowpass filter on white noise here for smoother code
-            // Actually, let's use the procedural generation for quality.
-            let b0,b1,b2,b3,b4,b5,b6; b0=b1=b2=b3=b4=b5=b6=0.0;
-            for (let i = 0; i < bufferSize; i++) {
-                let white = Math.random() * 2 - 1;
-                b0 = 0.99886 * b0 + white * 0.0555179;
-                b1 = 0.99332 * b1 + white * 0.0750759;
-                b2 = 0.96900 * b2 + white * 0.1538520;
-                b3 = 0.86650 * b3 + white * 0.3104856;
-                b4 = 0.55000 * b4 + white * 0.5329522;
-                b5 = -0.7616 * b5 - white * 0.0168980;
-                output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                output[i] *= 0.11; b6 = white * 0.115926;
-            }
-        } else if (type === 'brown') {
-            let lastOut = 0.0;
-            for (let i = 0; i < bufferSize; i++) {
-                let white = Math.random() * 2 - 1;
-                let out = (lastOut + (0.02 * white)) / 1.002;
-                output[i] = out * 3.5; lastOut = out;
-            }
-        } else if (type === 'green') {
-            // Green is like Pink but focused on mid-freqs (Nature)
-            // We use White buffer, but apply Bandpass Filter below
-        } else if (type === 'violet') {
-            // Violet is high freq. We use White buffer, apply Highpass below.
-        }
-
         const gain = audioCtx.createGain();
         gain.gain.setValueAtTime(0, audioCtx.currentTime);
         gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 1);
 
-        // Apply specific filters
         if (type === 'green') {
             const filter = audioCtx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = 1000;
-            noiseNode.connect(filter);
-            filter.connect(gain);
-        } else if (type === 'violet') {
+            filter.type = 'lowpass'; filter.frequency.value = 600;
+            noiseNode.connect(filter); filter.connect(gain);
+        } else if (type === 'pink') {
+             // Simple pinking filter
             const filter = audioCtx.createBiquadFilter();
-            filter.type = 'highpass';
-            filter.frequency.value = 2000;
-            noiseNode.connect(filter);
-            filter.connect(gain);
+            filter.type = 'lowpass'; filter.frequency.value = 1000;
+            noiseNode.connect(filter); filter.connect(gain);
         } else {
             noiseNode.connect(gain);
         }
@@ -661,6 +637,7 @@
         gain.connect(audioCtx.destination);
         noiseNode.start();
         document.getElementById(type + 'Btn').classList.add('playing');
+        vibrate(30);
     }
 
     function stopNoise() {
